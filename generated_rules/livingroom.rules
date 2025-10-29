@@ -1,0 +1,13 @@
+```text
+rule "Turn on lamp after sunset when motion detected"
+when
+    Item LivingRoom_MotionSensor changed to ON
+then
+    if (astro:sun:home:set#event.state == "START") {
+        sendCommand(LivingRoom_Lamp, ON)
+        createTimer(now.plusMinutes(10), [ | 
+            sendCommand(LivingRoom_Lamp, OFF) 
+        ])
+    }
+end
+```
