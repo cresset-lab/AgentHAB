@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from langchain_core.documents import Document
 
@@ -20,6 +20,7 @@ class PromptBuilder:
     request: str
     documents: List[Document] = field(default_factory=list)
     feedback_history: List[FeedbackEntry] = field(default_factory=list)
+    last_candidate: Optional[str] = None
 
     def add_feedback(self, source: str, message: str) -> None:
         """Persist feedback for subsequent regeneration attempts."""
@@ -34,13 +35,18 @@ class PromptBuilder:
             "request": self.request.strip(),
             "context": self._format_documents(),
             "feedback": self._format_feedback(),
+            "prior_code": self._format_prior_code(),
         }
 
     def validator_variables(self, candidate_code: str) -> dict:
         """Variables passed to the validator agent."""
         base = self.generator_variables()
+        base.pop("prior_code", None)
         base["candidate_code"] = candidate_code.strip()
         return base
+
+    def record_candidate(self, candidate_code: str) -> None:
+        self.last_candidate = candidate_code.strip()
 
     def _format_documents(self) -> str:
         if not self.documents:
@@ -62,5 +68,10 @@ class PromptBuilder:
         for idx, entry in enumerate(self.feedback_history, start=1):
             lines.append(f"{idx}. ({entry.source}) {entry.message}")
         return "\n".join(lines)
+
+    def _format_prior_code(self) -> str:
+        if not self.last_candidate:
+            return "None. Produce a fresh, fully-specified rule."
+        return self.last_candidate
 
 
