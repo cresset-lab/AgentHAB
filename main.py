@@ -33,6 +33,7 @@ def run_generation_loop(
     for attempt in range(1, max_attempts + 1):
         print(f"\n=== Generation attempt {attempt}/{max_attempts} ===")
         generation = generator.generate(**prompt_builder.generator_variables())
+        prompt_builder.record_candidate(generation.openhab_code)
         validation = validator.validate(**prompt_builder.validator_variables(generation.openhab_code))
         last_generation = generation
 
