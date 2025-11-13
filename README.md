@@ -1,222 +1,170 @@
 # openHABAgents
 
-An AI-powered tool that converts natural language automation requests into valid openHAB DSL rules and scripts. This project leverages LLMs to generate, validate, and deploy openHAB automation code without manual scripting.
+openHABAgents is an AI-driven toolkit that turns natural language automation requests into executable openHAB DSL rules. It couples an iterative generation and validation loop with optional deployment through an MCP server so you can move from intent to live automation quickly and safely.
 
-## 🎯 Overview
+## Overview
 
-openHABAgents provides two main components:
+The repository bundles two primary deliverables:
 
-1. **Natural Language to openHAB Code Generator**: Convert plain English descriptions into openHAB rules using AI agents
-2. **openHAB MCP Server**: A Model Context Protocol (MCP) server for AI assistants to interact with openHAB instances
+1. `main.py` orchestrates retrieval-augmented rule generation, iterative validation, and file management for `.rules` artifacts.
+2. `openhab-mcp-server/` implements a Model Context Protocol (MCP) server so assistants that speak MCP can inspect and update an openHAB installation.
 
-## ✨ Features
+## Key Features
 
-- 🤖 **AI-Powered Code Generation**: Automatically generate openHAB rules from natural language
-- ✅ **Built-in Validation**: LLM-based validator checks syntax and completeness
-- 📚 **Context-Aware**: Uses RAG (Retrieval Augmented Generation) with openHAB documentation
-- 🔧 **MCP Integration**: Connect Claude Desktop or Cline to your openHAB instance
-- 💾 **Automatic Rule Saving**: Generated rules are saved to `generated_rules/` directory
+- AI-assisted rule authoring powered by LangChain and the `gpt-4o-mini` chat model.
+- Iterative validator loop that incorporates structured feedback until a rule passes quality checks or the retry budget is exhausted.
+- Retrieval over curated documentation in `context/` using the LangChain BM25 retriever.
+- Configurable output location via `OPENHAB_RULES_DIR` with sensible defaults (`generated_rules/`).
+- Optional automatic deployment to an MCP server by setting `OPENHAB_MCP_URL` (plus token support).
+- Extensible prompt building that records prior candidates and validator feedback for subsequent iterations.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
-- Python 3.7+
-- OpenAI API key
-- (Optional) Running openHAB instance for MCP server
+- Python 3.10+ (virtual environments recommended).
+- An `OPENAI_API_KEY` with access to the `gpt-4o-mini` model family.
+- (Optional) An openHAB instance and the MCP server if you want automatic deployment.
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone <repository-url>
-cd openHABAgents
-```
+   ```bash
+   git clone <repository-url>
+   cd openHABAgents
+   ```
+2. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Provide credentials (for example via `.env`):
+   ```bash
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+### CLI Usage
 
-3. Set up environment variables:
-Create a `.env` file in the project root:
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-```
-
-### Basic Usage
-
-Generate an openHAB rule from natural language:
+Run a request and let the agents iterate up to the default three attempts:
 
 ```bash
 python main.py "Turn on the living room light when motion is detected"
 ```
 
-With custom output filename:
+Customise output and retry budget:
 
 ```bash
-python main.py "Turn off all lights at midnight" --out nighttime.rules
+python main.py "Turn off all lights at midnight" --out nighttime.rules --max-attempts 5
 ```
 
-## 📁 Project Structure
+Successful runs write a `.rules` file to `generated_rules/` (or the folder pointed to by `OPENHAB_RULES_DIR`) and print a validator summary.
+
+### Optional MCP Deployment
+
+If you want validated rules pushed to an MCP endpoint automatically, set:
+
+- `OPENHAB_MCP_URL`: base URL of your MCP server (for example `https://example.com/mcp`).
+- `OPENHAB_MCP_TOKEN` or `OPENHAB_STAGING_TOKEN`: bearer token for authenticated calls (optional).
+
+When these are present and the validator reports success, `main.py` will invoke `tools/mcp_client.deploy_rule_via_mcp` to submit the rule.
+
+## Project Structure
 
 ```
 openHABAgents/
+├── ARCHITECTURE.md               # High-level system design notes
 ├── agents/
-│   ├── policy_generator.py    # AI agent for code generation
-│   └── validator_agent.py     # AI agent for code validation
-├── context/
-│   ├── examples_rules.md      # Example openHAB rules
-│   ├── grammar_reference.md   # Syntax grammar reference
-│   ├── openhab_syntax.md      # openHAB DSL syntax guide
-│   └── tutorials.md           # Tutorial documentation
-├── generated_rules/           # Output directory for generated rules
-├── openhab-mcp-server/        # MCP server for AI assistant integration
+│   ├── policy_generator.py       # LangChain-based rule generator
+│   └── validator_agent.py        # Structured validator with JSON verdicts
+├── context/                      # Retrieval corpus (markdown sources)
+│   ├── examples_rules.md
+│   ├── grammar_reference.md
+│   ├── openhab_syntax.md
+│   └── tutorials.md
+├── generated_rules/              # Default output directory (created on demand)
+├── openhab-mcp-server/           # Standalone MCP server implementation
 ├── tools/
-│   ├── context_loader.py      # RAG context loading
-│   ├── loader.py              # Rule file operations
-│   └── openhab_api.py         # openHAB API utilities
-├── vectorstore/               # FAISS vector store for RAG
-├── main.py                    # Main CLI entry point
-└── requirements.txt           # Python dependencies
+│   ├── context_loader.py         # Builds the BM25 retriever
+│   ├── loader.py                 # File saver supporting OPENHAB_RULES_DIR overrides
+│   ├── mcp_client.py             # Thin HTTP client for MCP deployment
+│   ├── openhab_api.py            # Direct REST convenience wrapper
+│   └── prompt_builder.py         # Aggregates context, feedback, and prior code
+├── main.py                       # CLI entry point
+├── requirements.txt              # Python dependency pinning
+└── README.md
 ```
 
-## 🔧 How It Works
+See `openhab-mcp-server/README.md` for server-specific usage, environment variables, and Docker workflows.
 
-1. **Context Loading**: The system loads openHAB documentation, syntax guides, and examples into a vector store (FAISS)
-2. **Retrieval**: When you provide a natural language request, relevant documentation is retrieved using BM25/semantic search
-3. **Generation**: The policy generator agent uses GPT-4o-mini to create openHAB code based on your request and retrieved context
-4. **Validation**: The validator agent checks the generated code for syntax issues, missing triggers, and other problems
-5. **Saving**: Valid code is saved to the `generated_rules/` directory
+## How It Works
 
-## 🎯 Example Workflows
+1. **Context retrieval**: `tools/context_loader.load_contexts` ingests markdown files from `context/`, splits them with LangChain, and exposes a BM25 retriever.
+2. **Prompt assembly**: `PromptBuilder` collates the request, retrieved snippets, and accumulated validator feedback to provide consistent inputs to both agents.
+3. **Generation**: `PolicyGeneratorAgent` invokes `gpt-4o-mini` to synthesise a candidate `.rules` file, optionally guided by prior attempts.
+4. **Validation**: `ValidatorAgent` evaluates the candidate, returning a structured verdict and feedback that either ends the loop or triggers another attempt.
+5. **Persistence**: The most recent candidate is saved to disk via `tools.loader.save_rule`, respecting `OPENHAB_RULES_DIR` and the `--out` flag.
+6. **Deployment (optional)**: When validation succeeds and MCP variables are configured, `tools.mcp_client.deploy_rule_via_mcp` posts the rule to your server.
 
-### Example 1: Motion-Activated Light
-```bash
-python main.py "When motion sensor in hallway triggers, turn on hallway light for 5 minutes"
-```
+## Custom Context
 
-### Example 2: Temperature Control
-```bash
-python main.py "If bedroom temperature is above 25°C, turn on the AC" --out bedroom_climate.rules
-```
+Tailor the retrieval corpus to mirror your installation:
 
-### Example 3: Time-Based Automation
-```bash
-python main.py "Every weekday at 7 AM, open the bedroom blinds and turn on the coffee maker"
-```
+1. Add or edit markdown files in `context/` with device-specific examples, naming conventions, or policies.
+2. Run `python main.py ...` again; the retriever rebuilds in-memory on each execution, so no extra steps are required.
+3. Keep long documents concise and well-structured so BM25 can surface the right fragments.
 
-## 🔌 openHAB MCP Server
+## Configuration
 
-The included MCP server allows AI assistants like Claude Desktop and Cline to interact with your openHAB instance.
+- `OPENAI_API_KEY` (required): credentials for the LangChain OpenAI client.
+- `GENERATION_MAX_ATTEMPTS` (optional): overrides the default retry budget (`3`).
+- `OPENHAB_RULES_DIR` (optional): directory for generated `.rules` files.
+- `OPENHAB_MCP_URL` (optional): base URL for MCP deployment.
+- `OPENHAB_MCP_TOKEN` / `OPENHAB_STAGING_TOKEN` (optional): bearer token headers for MCP calls.
+- Additional variables for the MCP server (`OPENHAB_URL`, `OPENHAB_API_TOKEN`, etc.) are documented in `openhab-mcp-server/README.md`.
 
-### Features
-
-- **Item Management**: List, create, update, delete items and states
-- **Thing Management**: Full CRUD operations on things
-- **Rule Management**: Create, update, run, and delete rules
-- **Script Management**: Manage openHAB scripts
-- **Link Management**: Handle item-channel links
-
-### Quick Start with MCP Server
-
-1. Navigate to the MCP server directory:
-```bash
-cd openhab-mcp-server
-```
-
-2. Run with Docker/Podman:
-```bash
-docker run -d --rm -p 8081:8080 \
-  -e OPENHAB_URL=http://your-openhab-host:8080 \
-  -e OPENHAB_API_TOKEN=your-api-token \
-  --name openhab-mcp \
-  ghcr.io/tdeckers/openhab-mcp:latest
-```
-
-For detailed MCP server setup, see [openhab-mcp-server/README.md](openhab-mcp-server/README.md).
-
-## 📚 Adding Custom Context
-
-To improve code generation for your specific setup:
-
-1. Add example rules to `context/examples_rules.md`
-2. Add custom syntax documentation to `context/openhab_syntax.md`
-3. Delete the `vectorstore/` directory to rebuild the index
-4. Run the tool again to regenerate the vector store
-
-## 🛠️ Configuration
-
-### Environment Variables
-
-- `OPENAI_API_KEY`: Your OpenAI API key (required)
-- `OPENHAB_URL`: openHAB instance URL (for MCP server)
-- `OPENHAB_API_TOKEN`: openHAB API token (for MCP server)
-- `OPENHAB_USERNAME`: Basic auth username (optional)
-- `OPENHAB_PASSWORD`: Basic auth password (optional)
-
-### Command Line Arguments
+Command-line summary:
 
 ```bash
-python main.py [OPTIONS] <natural_language_request>
+python main.py [OPTIONS] "<natural language request>"
 
 Options:
-  --out FILENAME    Output filename (default: generated.rules)
+  --out FILENAME       Custom output file name (default: generated.rules)
+  --max-attempts N     Maximum generator/validator iterations
 ```
 
-## 🤝 Integration with openHAB
+## Using Generated Rules in openHAB
 
-To use generated rules in your openHAB instance:
+1. Copy the generated `.rules` file from `generated_rules/` (or your chosen directory) into the `rules/` folder of your openHAB installation.
+2. openHAB will detect the new rule automatically; monitor the logs to confirm activation.
+3. If you prefer hands-free deployment, configure the MCP server and let the CLI push validated rules for you.
 
-1. Copy the generated `.rules` file from `generated_rules/` to your openHAB `rules/` directory
-2. openHAB will automatically detect and load the new rule
-3. Monitor openHAB logs for any runtime errors
+## Development
 
-## 🧪 Development
+- Core dependencies are pinned in `requirements.txt` (LangChain, OpenAI SDK, python-dotenv, requests, rank-bm25).
+- The MCP server publishes its own `pyproject.toml` with Hatch/Black/Flake8 tooling for contributors.
+- Refer to `ARCHITECTURE.md` for design rationale and extension points.
 
-### Project Dependencies
-
-- `langchain>=0.2.14`: RAG framework
-- `openai>=1.54.0`: OpenAI API client
-- `python-dotenv>=1.0.1`: Environment variable management
-- `requests>=2.32.3`: HTTP requests
-- `rank-bm25>=0.2.2`: BM25 retrieval
-
-### Agent Architecture
-
-**Policy Generator Agent** (`agents/policy_generator.py`):
-- Takes natural language input
-- Retrieves relevant context from vector store
-- Generates openHAB DSL code using GPT-4o-mini
-
-**Validator Agent** (`agents/validator_agent.py`):
-- Checks generated code for syntax errors
-- Validates triggers, conditions, and actions
-- Provides feedback on potential issues
-
-## 📝 License
+## License
 
 MIT
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- Built with [LangChain](https://github.com/langchain-ai/langchain)
-- openHAB MCP server inspired by the Model Context Protocol
-- Powered by OpenAI's GPT models
+- Built with [LangChain](https://github.com/langchain-ai/langchain).
+- Inspired by the Model Context Protocol initiative.
+- Powered by OpenAI models.
 
-## 📮 Support
+## Support
 
-For issues and questions:
-- Check existing rules in `generated_rules/` for examples
-- Review context documentation in `context/`
-- Consult the [openHAB documentation](https://www.openhab.org/docs/)
+- Browse `generated_rules/` for reference outputs.
+- Review the curated documentation in `context/`.
+- Consult the official [openHAB documentation](https://www.openhab.org/docs/).
 
-## 🚧 Future Enhancements
+## Future Enhancements
 
-- [ ] Support for more openHAB scripting languages (JavaScript, Jython)
-- [ ] Direct deployment to openHAB instance via REST API
-- [ ] Interactive refinement of generated rules
-- [ ] Rule testing and simulation
-- [ ] Integration with openHAB's UI for item/thing discovery
-- [ ] Multi-rule generation from complex scenarios
+- [ ] Support additional openHAB scripting languages (JavaScript, Jython).
+- [ ] Direct REST deployment into openHAB without MCP intermediaries.
+- [ ] Interactive refinement loops with user feedback.
+- [ ] Rule simulation and testing utilities.
+- [ ] Enhanced item/thing discovery from openHAB APIs.
+- [ ] Multi-rule orchestration for complex automation scenarios.
 
