@@ -36,16 +36,29 @@ class PolicyGeneratorAgent:
                     "system",
                     self.SYSTEM_PROMPT
                     + "\n\nContext snippets:\n{context}\n\n"
-                    "Outstanding feedback to resolve:\n{feedback}",
+                    "Outstanding feedback to resolve:\n{feedback}\n\n"
+                    "Prior candidate rule (revise if provided):\n{prior_code}",
                 ),
                 ("user", "User request:\n{request}"),
             ]
         )
 
-    def generate(self, *, request: str, context: str, feedback: str) -> GenerationResult:
+    def generate(
+        self,
+        *,
+        request: str,
+        context: str,
+        feedback: str,
+        prior_code: str,
+    ) -> GenerationResult:
         """Invoke the agent and return the generated openHAB code."""
         prompt_messages = self.prompt.invoke(
-            {"request": request, "context": context, "feedback": feedback}
+            {
+                "request": request,
+                "context": context,
+                "feedback": feedback,
+                "prior_code": prior_code,
+            }
         )
         response = self.llm.invoke(prompt_messages)
         code = (response.content or "").strip()
