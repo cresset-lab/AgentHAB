@@ -21,7 +21,7 @@ def run_generation_loop(
     retriever,
     *,
     max_attempts: int,
-) -> Tuple[GenerationResult, ValidationResult]:
+) -> Tuple[GenerationResult, ValidationResult, bool]:
     """Iteratively generate and validate openHAB code with a retry guard."""
     docs = retriever.invoke(request)
     prompt_builder = PromptBuilder(request=request, documents=list(docs))
@@ -29,14 +29,16 @@ def run_generation_loop(
     validator = ValidatorAgent()
 
     last_validation: ValidationResult | None = None
+    last_generation: GenerationResult | None = None
     for attempt in range(1, max_attempts + 1):
         print(f"\n=== Generation attempt {attempt}/{max_attempts} ===")
         generation = generator.generate(**prompt_builder.generator_variables())
         validation = validator.validate(**prompt_builder.validator_variables(generation.openhab_code))
+        last_generation = generation
 
         if validation.is_valid:
             print("Validator: PASS")
-            return generation, validation
+            return generation, validation, True
 
         last_validation = validation
         feedback_entry = validation.as_feedback_entry()
@@ -44,12 +46,14 @@ def run_generation_loop(
         print("Validator: FAIL")
         print(feedback_entry)
 
-    message = (
-        last_validation.as_feedback_entry() if last_validation else "Unknown validator failure."
+    if last_generation is None or last_validation is None:
+        raise RuntimeError("Generation loop terminated without producing any attempts.")
+
+    print(
+        f"Exceeded {max_attempts} attempts without validator approval. "
+        "Saving latest result for manual review."
     )
-    raise RuntimeError(
-        f"Failed to produce valid openHAB code after {max_attempts} attempts.\nLast feedback:\n{message}"
-    )
+    return last_generation, last_validation, False
 
 
 def maybe_deploy_via_mcp(rule_code: str, *, request: str, destination_name: str) -> None:
@@ -89,23 +93,24 @@ def main() -> None:
     request = " ".join(args.prompt).strip()
     retriever = load_contexts(path="./context", vs_path="./vectorstore/faiss")
 
-    try:
-        generation, validation = run_generation_loop(
-            request,
-            retriever,
-            max_attempts=args.max_attempts,
-        )
-    except RuntimeError as exc:
-        print(str(exc))
-        sys.exit(1)
+    generation, validation, is_valid = run_generation_loop(
+        request,
+        retriever,
+        max_attempts=args.max_attempts,
+    )
 
     output_filename = args.out or "generated.rules"
     path = save_rule(generation.openhab_code, filename=output_filename)
     print(f"Saved rule to {path}")
     print(f"Validator summary: {validation.summary}")
+    if not is_valid:
+        print(validation.as_feedback_entry())
 
     destination_name = Path(output_filename).stem
-    maybe_deploy_via_mcp(generation.openhab_code, request=request, destination_name=destination_name)
+    if is_valid:
+        maybe_deploy_via_mcp(generation.openhab_code, request=request, destination_name=destination_name)
+    else:
+        print("Skipping MCP deployment because validator did not approve the rule.")
 
 
 if __name__ == "__main__":

@@ -4,8 +4,7 @@ import json
 from dataclasses import dataclass
 from typing import List, Optional
 
-from langchain.agents import AgentExecutor, create_openai_functions_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
 
@@ -49,12 +48,11 @@ class ValidatorAgent:
         self,
         *,
         model: str = "gpt-4o-mini",
-        temperature: float = 0.0,
+        temperature: float = 1.5,
         llm: ChatOpenAI | None = None,
     ) -> None:
         self.llm = llm or ChatOpenAI(model=model, temperature=temperature)
-        self.tools = []
-        prompt = ChatPromptTemplate.from_messages(
+        self.prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", self.SYSTEM_PROMPT + "\nPrior validator feedback:\n{feedback}"),
                 (
@@ -62,16 +60,7 @@ class ValidatorAgent:
                     "User request:\n{request}\n\nContext snippets:\n{context}\n\n"
                     "Candidate openHAB code:\n{candidate_code}",
                 ),
-                MessagesPlaceholder(variable_name="agent_scratchpad"),
             ]
-        )
-        agent = create_openai_functions_agent(self.llm, self.tools, prompt)
-        self.executor = AgentExecutor(
-            agent=agent,
-            tools=self.tools,
-            verbose=False,
-            return_intermediate_steps=True,
-            handle_parsing_errors=True,
         )
 
     def validate(
@@ -89,8 +78,9 @@ class ValidatorAgent:
             "feedback": feedback,
             "candidate_code": candidate_code,
         }
-        result = self.executor.invoke(inputs)
-        output = (result.get("output") or "").strip()
+        prompt_messages = self.prompt.invoke(inputs)
+        response = self.llm.invoke(prompt_messages)
+        output = (response.content or "").strip()
         parsed = self._parse_output(output)
         return ValidationResult(
             verdict=parsed.get("verdict", "invalid"),
