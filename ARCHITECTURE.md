@@ -10,19 +10,27 @@ flowchart TD
     M --> C["Context Loader<br/>tools/context_loader.py"]
     C -->|"load & split"| D[("context/*.md")]
     C -->|"BM25"| R["Retriever"]
-    M -->|"assemble prompts"| PB["Prompt Builder"]
+    M -->|"fetch system state"| CF["Context Fetcher<br/>tools/context_fetcher.py"]
+    CF -->|"REST API"| OH["openHAB Instance<br/>(items, things, rules)"]
+    CF -->|"parse local"| LR[("generated_rules/*.rules")]
+    CF -->|"system context"| M
+    M -->|"assemble prompts"| PB["Prompt Builder<br/>+system context"]
     R -->|"top-k snippets"| PB
     PB -->|"generator prompt"| G["Policy Generator<br/>agents/policy_generator.py"]
     G -->|"call"| OA[("OpenAI API<br/>gpt-4o-mini")]
     OA -->|"rule draft"| M
-    PB -->|"validator prompt"| V["Validator<br/>agents/validator_agent.py"]
-    M -->|"submit draft"| V
+    M -->|"submit draft"| CV["Context Validator<br/>agents/context_validator.py"]
+    CV -->|"check items,<br/>conflicts,<br/>security"| CRES{"context valid?"}
+    CRES -->|No| CFB["Context Feedback"]
+    CFB -->|"update instructions"| M
+    CRES -->|Yes| V["Syntax Validator<br/>agents/validator_agent.py"]
+    PB -->|"validator prompt"| V
     V -->|"call"| OA
     OA -->|"syntax report"| V
-    V -->|"validation result"| RES{"valid rule?"}
+    V -->|"validation result"| RES{"syntax valid?"}
     RES -->|Yes| S["Save Rule<br/>tools/loader.py"]
     S --> F[("generated_rules/*.rules")]
-    RES -->|No| FB["Validator Feedback"]
+    RES -->|No| FB["Syntax Feedback"]
     FB -->|"update instructions"| M
     M -->|"retry?"| Guard{"attempts < limit?"}
     Guard -->|Yes| PB
