@@ -3,7 +3,7 @@
 The diagram below illustrates the natural language to openHAB rule generation flow and the optional MCP server integration, focusing on the main components you interact with.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#000','primaryBorderColor':'#1976d2','lineColor':'#424242','secondaryColor':'#fff3e0','secondaryTextColor':'#000','secondaryBorderColor':'#f57c00','tertiaryColor':'#f3e5f5','tertiaryTextColor':'#000','tertiaryBorderColor':'#7b1fa2','background':'#ffffff','mainBkg':'#ffffff','nodeBorder':'#333','clusterBkg':'#fafafa','clusterBorder':'#999','edgeLabelBackground':'#ffffff'}}}%%
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#000','primaryBorderColor':'#1976d2','lineColor':'#424242','secondaryColor':'#fff3e0','secondaryTextColor':'#000','secondaryBorderColor':'#f57c00','tertiaryColor':'#f3e5f5','tertiaryTextColor':'#000','tertiaryBorderColor':'#7b1fa2','background':'#ffffff','mainBkg':'#ffffff','nodeBorder':'#333','clusterBkg':'#ffffff','clusterBorder':'#999','edgeLabelBackground':'#ffffff'}}}%%
 flowchart TD
   %% Complete rule generation and validation flow
 
