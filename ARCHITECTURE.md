@@ -18,23 +18,23 @@ flowchart TD
   
   Generate --> SyntaxVal["7. ValidatorAgent<br/>Syntax validation<br/>(structure, grammar, DSL)"]
   
-  SyntaxVal -->|"❌ Syntax Invalid"| Feedback1["Add syntax errors<br/>to feedback"]
+  SyntaxVal -->|"Syntax Invalid"| Feedback1["Add syntax errors<br/>to feedback"]
   Feedback1 --> CheckAttempts1{Reached<br/>max attempts?}
   CheckAttempts1 -->|"No"| Generate
   CheckAttempts1 -->|"Yes"| SaveRules
   
-  SyntaxVal -->|"✅ Syntax Valid"| ContextCheck{Context validation<br/>enabled?}
+  SyntaxVal -->|"Syntax Valid"| ContextCheck{Context validation<br/>enabled?}
   
   ContextCheck -->|"No (disabled via<br/>--no-context-validation)"| SaveRules["10. Save Rules<br/>generated_rules/*.rules<br/>(ALWAYS saves)"]
   
   ContextCheck -->|"Yes (default)"| ContextVal["8. ContextValidatorAgent<br/>Validate against live system<br/>(items exist, types match,<br/>no conflicts, security)"]
   
-  ContextVal -->|"❌ Context Invalid"| Feedback2["Add context errors<br/>to feedback"]
+  ContextVal -->|"Context Invalid"| Feedback2["Add context errors<br/>to feedback"]
   Feedback2 --> CheckAttempts2{Reached<br/>max attempts?}
   CheckAttempts2 -->|"No"| Generate
   CheckAttempts2 -->|"Yes"| SaveRules
   
-  ContextVal -->|"✅ Valid (with<br/>optional warnings)"| SaveRules
+  ContextVal -->|"Valid (with<br/>optional warnings)"| SaveRules
   
   SaveRules --> DeployCheck{Rules fully<br/>valid &<br/>MCP configured?}
   

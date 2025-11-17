@@ -1,18 +1,22 @@
 # openHABAgents
 
-openHABAgents is an AI-driven toolkit that turns natural language automation requests into executable openHAB DSL rules. It couples an iterative generation and validation loop with optional deployment through an MCP server so you can move from intent to live automation quickly and safely.
+openHABAgents is an AI-driven toolkit that turns natural language automation requests into executable openHAB DSL rules. It couples an iterative generation and validation loop with direct openHAB integration so you can move from intent to live automation quickly and safely.
 
 ## Overview
 
-The repository bundles two primary deliverables:
+The repository bundles two primary components:
 
-1. `main.py` orchestrates retrieval-augmented rule generation, iterative validation, and file management for `.rules` artifacts.
-2. `openhab-mcp-server/` implements a Model Context Protocol (MCP) server so assistants that speak MCP can inspect and update an openHAB installation.
+1. **Python Agents** (`main.py`) - Orchestrates retrieval-augmented rule generation, iterative validation against live openHAB state, and file management for `.rules` artifacts. The agents use `OpenHABClient` directly as a Python library.
+2. **MCP Server** (`openhab-mcp/`) - Optional standalone Model Context Protocol server for Claude Desktop and Cursor/Cline integration. This is **NOT** used by the Python agents.
 
 ## Key Features
 
 - AI-assisted rule authoring powered by LangChain and the `gpt-4o-mini` chat model.
+- **Context-aware validation**: Validates rules against live openHAB system state to prevent undefined items, conflicts, and security issues.
+- **Conflict detection**: Analyzes existing rules (both live and locally generated) to detect duplicate triggers and contradictory actions.
+- **Security reasoning**: LLM-based security analysis to detect dangerous patterns (HVAC conflicts, infinite loops, etc.).
 - Iterative validator loop that incorporates structured feedback until a rule passes quality checks or the retry budget is exhausted.
+- **Individual rule file management**: Each generated rule is automatically saved to a separate `.rules` file for better organization and modularity.
 - Retrieval over curated documentation in `context/` using the LangChain BM25 retriever.
 - Configurable output location via `OPENHAB_RULES_DIR` with sensible defaults (`generated_rules/`).
 - Optional automatic deployment to an MCP server by setting `OPENHAB_MCP_URL` (plus token support).
@@ -22,9 +26,10 @@ The repository bundles two primary deliverables:
 
 ### Prerequisites
 
-- Python 3.10+ (virtual environments recommended).
-- An `OPENAI_API_KEY` with access to the `gpt-4o-mini` model family.
-- (Optional) An openHAB instance and the MCP server if you want automatic deployment.
+- Python 3.10+ (virtual environments recommended)
+- An `OPENAI_API_KEY` with access to the `gpt-4o-mini` model family
+- (Optional) An openHAB instance for context-aware validation and deployment
+- (Optional) Docker for running openHAB locally
 
 ### Installation
 
@@ -37,9 +42,31 @@ The repository bundles two primary deliverables:
    ```bash
    pip install -r requirements.txt
    ```
-3. Provide credentials (for example via `.env`):
+3. Set up openHAB (choose one option):
+   
+   **Option A: Use existing openHAB instance**
    ```bash
+   cp env.example .env
+   # Edit .env and add your credentials
    OPENAI_API_KEY=your_openai_api_key_here
+   OPENHAB_URL=http://localhost:8080
+   OPENHAB_API_TOKEN=your_token_here
+   ```
+   
+   **Option B: Run openHAB in Docker**
+   ```bash
+   cd openhab-mcp
+   docker compose -f docker-compose.macos.yml up -d
+   # Access openHAB UI at http://localhost:18080
+   # Generate API token in: Settings → API Security
+   
+   # Then configure .env
+   cd ..
+   cp env.example .env
+   # Edit .env with:
+   OPENAI_API_KEY=your_openai_api_key_here
+   OPENHAB_URL=http://localhost:18080
+   OPENHAB_API_TOKEN=your_generated_token
    ```
 
 ### CLI Usage
@@ -53,19 +80,20 @@ python main.py "Turn on the living room light when motion is detected"
 Customise output and retry budget:
 
 ```bash
-python main.py "Turn off all lights at midnight" --out nighttime.rules --max-attempts 5
+python main.py "Turn off all lights at midnight" --out nighttime --max-attempts 5
 ```
 
-Successful runs write a `.rules` file to `generated_rules/` (or the folder pointed to by `OPENHAB_RULES_DIR`) and print a validator summary.
+Successful runs write each generated rule to a separate `.rules` file in `generated_rules/` (or the folder pointed to by `OPENHAB_RULES_DIR`) and print a validator summary. The `--out` flag specifies a prefix for the generated files (e.g., `--out nighttime` might create `nighttime_turn_off_all_lights_at_midnight.rules`).
 
-### Optional MCP Deployment
+### Optional: MCP Server for Claude/Cursor Integration
 
-If you want validated rules pushed to an MCP endpoint automatically, set:
+The MCP server (`openhab-mcp/`) is **separate** from the Python agents and only needed if you want to use Claude Desktop or Cursor/Cline to interact with openHAB through natural language.
 
-- `OPENHAB_MCP_URL`: base URL of your MCP server (for example `https://example.com/mcp`).
-- `OPENHAB_MCP_TOKEN` or `OPENHAB_STAGING_TOKEN`: bearer token for authenticated calls (optional).
+**The Python agents do NOT use the MCP server** - they connect directly to openHAB via `OpenHABClient`.
 
-When these are present and the validator reports success, `main.py` will invoke `tools/mcp_client.deploy_rule_via_mcp` to submit the rule.
+To set up MCP integration for Claude/Cursor:
+1. See `openhab-mcp/README.md` for detailed instructions
+2. The MCP server will be invoked on-demand by your AI assistant when you ask questions about your openHAB system
 
 ## Project Structure
 
@@ -74,35 +102,141 @@ openHABAgents/
 ├── ARCHITECTURE.md               # High-level system design notes
 ├── agents/
 │   ├── policy_generator.py       # LangChain-based rule generator
-│   └── validator_agent.py        # Structured validator with JSON verdicts
+│   ├── validator_agent.py        # Syntax validator with JSON verdicts
+│   └── context_validator.py      # Live system state validator
 ├── context/                      # Retrieval corpus (markdown sources)
 │   ├── examples_rules.md
 │   ├── grammar_reference.md
 │   ├── openhab_syntax.md
 │   └── tutorials.md
 ├── generated_rules/              # Default output directory (created on demand)
-├── openhab-mcp-server/           # Standalone MCP server implementation
+├── openhab-mcp/                  # MCP server (optional, for Claude/Cursor)
+│   ├── openhab_client.py         # OpenHAB REST API client (used by agents)
+│   ├── models.py                 # Data models for items, things, rules
+│   ├── openhab_mcp_server.py     # MCP server implementation
+│   └── docker-compose.macos.yml  # Run openHAB in Docker
 ├── tools/
 │   ├── context_loader.py         # Builds the BM25 retriever
-│   ├── loader.py                 # File saver supporting OPENHAB_RULES_DIR overrides
-│   ├── mcp_client.py             # Thin HTTP client for MCP deployment
-│   ├── openhab_api.py            # Direct REST convenience wrapper
+│   ├── context_fetcher.py        # Fetches live openHAB system state
+│   ├── rule_parser.py            # Parses .rules files
+│   ├── loader.py                 # File saver with OPENHAB_RULES_DIR support
 │   └── prompt_builder.py         # Aggregates context, feedback, and prior code
 ├── main.py                       # CLI entry point
 ├── requirements.txt              # Python dependency pinning
+├── setup-env.sh                  # Quick setup script
 └── README.md
 ```
 
-See `openhab-mcp-server/README.md` for server-specific usage, environment variables, and Docker workflows.
+See `openhab-mcp/README.md` for MCP server setup (Claude/Cursor integration only).
+
+## Architecture
+
+## Architecture Diagram
+
+The diagram below illustrates the natural language to openHAB rule generation flow and the optional MCP server integration, focusing on the main components you interact with.
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','primaryTextColor':'#000','primaryBorderColor':'#1976d2','lineColor':'#424242','secondaryColor':'#fff3e0','secondaryTextColor':'#000','secondaryBorderColor':'#f57c00','tertiaryColor':'#f3e5f5','tertiaryTextColor':'#000','tertiaryBorderColor':'#7b1fa2','background':'#ffffff','mainBkg':'#ffffff','nodeBorder':'#333','clusterBkg':'#ffffff','clusterBorder':'#999','edgeLabelBackground':'#ffffff'}}}%%
+flowchart TD
+  %% Complete rule generation and validation flow
+
+  Start["1. User: Natural language<br/>automation request via CLI"] --> Main["2. main.py<br/>CLI entrypoint & orchestrator"]
+  
+  Main --> LoadContext["3. Load Context<br/>- Documentation (context/*.md)<br/>- BM25 Retriever"]
+  LoadContext --> FetchSystem["4. Fetch System Context<br/>(optional, can be disabled)<br/>- Items, Things, Existing Rules<br/>via MCP Server"]
+  
+  FetchSystem --> GenLoop["5. Generation Loop<br/>(max_attempts)"]
+  
+  GenLoop --> Generate["6. PolicyGeneratorAgent<br/>Generate openHAB DSL rule<br/>using context + feedback"]
+  
+  Generate --> SyntaxVal["7. ValidatorAgent<br/>Syntax validation<br/>(structure, grammar, DSL)"]
+  
+  SyntaxVal -->|"Syntax Invalid"| Feedback1["Add syntax errors<br/>to feedback"]
+  Feedback1 --> CheckAttempts1{Reached<br/>max attempts?}
+  CheckAttempts1 -->|"No"| Generate
+  CheckAttempts1 -->|"Yes"| SaveRules
+  
+  SyntaxVal -->|"Syntax Valid"| ContextCheck{Context validation<br/>enabled?}
+  
+  ContextCheck -->|"No (disabled via<br/>--no-context-validation)"| SaveRules["10. Save Rules<br/>generated_rules/*.rules<br/>(ALWAYS saves)"]
+  
+  ContextCheck -->|"Yes (default)"| ContextVal["8. ContextValidatorAgent<br/>Validate against live system<br/>(items exist, types match,<br/>no conflicts, security)"]
+  
+  ContextVal -->|"Context Invalid"| Feedback2["Add context errors<br/>to feedback"]
+  Feedback2 --> CheckAttempts2{Reached<br/>max attempts?}
+  CheckAttempts2 -->|"No"| Generate
+  CheckAttempts2 -->|"Yes"| SaveRules
+  
+  ContextVal -->|"Valid (with<br/>optional warnings)"| SaveRules
+  
+  SaveRules --> DeployCheck{Rules fully<br/>valid &<br/>MCP configured?}
+  
+  DeployCheck -->|"Yes"| Deploy["11. Deploy to openHAB<br/>via MCP Server<br/>(optional)"]
+  DeployCheck -->|"No"| End["12. Complete<br/>Rules saved locally<br/>for manual review"]
+  Deploy --> End
+
+  subgraph Context["Context Sources"]
+    Docs["Documentation<br/>context/*.md"]
+    SystemState["Live System State<br/>- Items<br/>- Things<br/>- Existing Rules"]
+    OH["openHAB Instance<br/>(REST API)"]
+  end
+
+  subgraph MCP["MCP Server (Separate Tool)"]
+    MCPServer["openhab-mcp-server<br/>Python MCP implementation"]
+    IDE["Claude/Cursor<br/>Direct IDE integration"]
+  end
+
+  LoadContext -.->|"reads"| Docs
+  FetchSystem -.->|"queries via"| MCPServer
+  MCPServer -.->|"REST API"| OH
+  Deploy -.->|"deploys via"| MCPServer
+  IDE -.->|"uses"| MCPServer
+  
+  SystemState -.->|"retrieved from"| OH
+
+  %% Styling
+  classDef inputNode fill:#4caf50,stroke:#2e7d32,stroke-width:3px,color:#fff
+  classDef processNode fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#fff
+  classDef validationNode fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
+  classDef decisionNode fill:#9c27b0,stroke:#6a1b9a,stroke-width:2px,color:#fff
+  classDef outputNode fill:#4caf50,stroke:#2e7d32,stroke-width:3px,color:#fff
+  classDef dataNode fill:#607d8b,stroke:#37474f,stroke-width:2px,color:#fff
+  classDef loopNode fill:#f44336,stroke:#c62828,stroke-width:2px,color:#fff
+
+  class Start inputNode
+  class Main,LoadContext,FetchSystem,Generate,GenLoop processNode
+  class SyntaxVal,ContextVal validationNode
+  class ContextCheck,DeployCheck,CheckAttempts1,CheckAttempts2 decisionNode
+  class SaveRules,Deploy,End outputNode
+  class Docs,SystemState,OH,MCPServer,IDE dataNode
+  class Feedback1,Feedback2 loopNode
+```
 
 ## How It Works
 
-1. **Context retrieval**: `tools/context_loader.load_contexts` ingests markdown files from `context/`, splits them with LangChain, and exposes a BM25 retriever.
-2. **Prompt assembly**: `PromptBuilder` collates the request, retrieved snippets, and accumulated validator feedback to provide consistent inputs to both agents.
-3. **Generation**: `PolicyGeneratorAgent` invokes `gpt-4o-mini` to synthesise a candidate `.rules` file, optionally guided by prior attempts.
-4. **Validation**: `ValidatorAgent` evaluates the candidate, returning a structured verdict and feedback that either ends the loop or triggers another attempt.
-5. **Persistence**: The most recent candidate is saved to disk via `tools.loader.save_rule`, respecting `OPENHAB_RULES_DIR` and the `--out` flag.
-6. **Deployment (optional)**: When validation succeeds and MCP variables are configured, `tools.mcp_client.deploy_rule_via_mcp` posts the rule to your server.
+1. **Context retrieval**: `tools/context_loader.load_contexts` ingests markdown files from `context/`, splits them with LangChain, and exposes a BM25 retriever for relevant documentation.
+
+2. **Live system context** (optional): When `OPENHAB_URL` and `OPENHAB_API_TOKEN` are configured:
+   - `SystemContextFetcher` uses `OpenHABClient` (as a Python library) to fetch all items, things, and rules
+   - Loads previously generated rules from `generated_rules/` directory
+   - Provides complete system state for validation
+
+3. **Prompt assembly**: `PromptBuilder` collates the request, retrieved documentation snippets, live system context, and accumulated validator feedback.
+
+4. **AI generation**: `PolicyGeneratorAgent` invokes `gpt-4o-mini` to synthesize a candidate `.rules` file, guided by documentation context and aware of available items.
+
+5. **Context-aware validation**: `ContextValidatorAgent` checks the candidate rule against live system state:
+   - ✓ Verifies all referenced items exist in openHAB
+   - ✓ Checks item type compatibility (e.g., can't dim a Switch)
+   - ✓ Detects conflicts with existing rules (duplicate triggers, contradictory actions)
+   - ✓ Identifies security vulnerabilities (HVAC conflicts, infinite loops, water hazards)
+   - ✓ Validates thing status and availability
+
+6. **Syntax validation**: `ValidatorAgent` evaluates DSL syntax and structure, returning structured feedback.
+
+7. **Iterative refinement**: If validation fails, feedback is incorporated and the generation-validation loop continues up to `GENERATION_MAX_ATTEMPTS` times.
+
+8. **Persistence**: Each rule in the validated output is parsed and saved to its own `.rules` file via `tools.loader.save_rule`, respecting `OPENHAB_RULES_DIR` and the `--out` filename prefix.
 
 ## Custom Context
 
@@ -114,28 +248,51 @@ Tailor the retrieval corpus to mirror your installation:
 
 ## Configuration
 
-- `OPENAI_API_KEY` (required): credentials for the LangChain OpenAI client.
-- `GENERATION_MAX_ATTEMPTS` (optional): overrides the default retry budget (`3`).
-- `OPENHAB_RULES_DIR` (optional): directory for generated `.rules` files.
-- `OPENHAB_MCP_URL` (optional): base URL for MCP deployment.
-- `OPENHAB_MCP_TOKEN` / `OPENHAB_STAGING_TOKEN` (optional): bearer token headers for MCP calls.
-- Additional variables for the MCP server (`OPENHAB_URL`, `OPENHAB_API_TOKEN`, etc.) are documented in `openhab-mcp-server/README.md`.
+### Environment Variables
 
-Command-line summary:
+**Required:**
+- `OPENAI_API_KEY` - OpenAI API key for LangChain (GPT-4o-mini model)
+
+**For Context-Aware Validation:**
+- `OPENHAB_URL` - openHAB instance URL (e.g., `http://localhost:8080` or `http://localhost:18080` for Docker)
+- `OPENHAB_API_TOKEN` - API token from openHAB (Settings → API Security)
+- `ENABLE_CONTEXT_VALIDATION` - Enable/disable live validation (default: `true` if URL/token set)
+
+**Optional:**
+- `GENERATION_MAX_ATTEMPTS` - Maximum retry attempts (default: `3`)
+- `OPENHAB_RULES_DIR` - Output directory for `.rules` files (default: `generated_rules/`)
+
+**Note:** The `OPENHAB_MCP_URL` and `OPENHAB_MCP_TOKEN` variables are NOT used by the Python agents. See `openhab-mcp/README.md` for MCP server configuration.
+
+### Command-line Summary
 
 ```bash
 python main.py [OPTIONS] "<natural language request>"
 
 Options:
-  --out FILENAME       Custom output file name (default: generated.rules)
-  --max-attempts N     Maximum generator/validator iterations
+  --out PREFIX                Output filename prefix for generated rules (each rule saved separately)
+  --max-attempts N            Maximum generator/validator iterations
+  --no-context-validation     Disable context-aware validation (skip live system checks)
 ```
 
 ## Using Generated Rules in openHAB
 
-1. Copy the generated `.rules` file from `generated_rules/` (or your chosen directory) into the `rules/` folder of your openHAB installation.
-2. openHAB will detect the new rule automatically; monitor the logs to confirm activation.
-3. If you prefer hands-free deployment, configure the MCP server and let the CLI push validated rules for you.
+Generated rules are saved to `generated_rules/` (or your configured `OPENHAB_RULES_DIR`). To deploy them:
+
+**Option 1: Manual Deployment**
+1. Copy the generated `.rules` files into the `conf/rules/` folder of your openHAB installation
+2. openHAB will detect the new rules automatically
+3. Monitor openHAB logs to confirm activation
+
+**Option 2: Docker Volume Mount**
+If running openHAB in Docker, mount your `generated_rules/` directory:
+```yaml
+volumes:
+  - ./generated_rules:/openhab/conf/rules
+```
+
+**Option 3: Direct REST API Deployment**
+Use the openHAB REST API to deploy rules programmatically (future enhancement).
 
 ## Development
 
@@ -153,11 +310,21 @@ MIT
 - Inspired by the Model Context Protocol initiative.
 - Powered by OpenAI models.
 
+## Documentation
+
+📚 **[Complete Documentation Index](DOCUMENTATION_INDEX.md)** - Navigate all documentation
+
+**Quick Links:**
+- [FAQ](FAQ.md) - Common questions and troubleshooting
+- [Architecture Overview](ARCHITECTURE_OVERVIEW.md) - Understand how everything connects
+- [Quick Start Guide](openhab-mcp/QUICK_START.md) - Get running in 3 minutes
+- [Setup Guide](openhab-mcp/SETUP_GUIDE.md) - Detailed setup instructions
+
 ## Support
 
-- Browse `generated_rules/` for reference outputs.
-- Review the curated documentation in `context/`.
-- Consult the official [openHAB documentation](https://www.openhab.org/docs/).
+- Browse `generated_rules/` for reference outputs
+- Review the curated documentation in `context/`
+- Consult the official [openHAB documentation](https://www.openhab.org/docs/)
 
 ## Future Enhancements
 
