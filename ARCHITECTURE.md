@@ -4,22 +4,22 @@ The diagram below illustrates the natural language to openHAB rule generation fl
 
 ```mermaid
 flowchart TD
-  %% High-level architecture: Python agents + openHAB + optional MCP server
+  %% High-level architecture: OpenHAB Python agents + openHAB + optional MCP server
 
-  subgraph A["Python Agents (CLI)"]
-    U["User (CLI)"] --> M["main.py"]
-    M --> PG["PolicyGeneratorAgent\n(agents/policy_generator.py)"]
-    M --> CV["ContextValidatorAgent\n(agents/context_validator.py)"]
-    M --> SV["ValidatorAgent\n(agents/validator_agent.py)"]
+  subgraph A["OpenHAB Python Agents (CLI)"]
+    U["1. Natural language rule (User via CLI)"] --> M["2. main.py (CLI entrypoint)"]
+    M --> PG["5. PolicyGeneratorAgent\n(agents/policy_generator.py)"]
+    M --> CV["6. ContextValidatorAgent\n(agents/context_validator.py)"]
+    M --> SV["7. ValidatorAgent\n(agents/validator_agent.py)"]
   end
 
   subgraph B["Context & System State"]
-    CL["Context Loader\n(tools/context_loader.py)"]
+    CL["3. Context Loader\n(tools/context_loader.py)"]
     DOCS["Markdown docs\n(context/*.md)"]
     R["BM25 Retriever"]
-    CF["SystemContextFetcher\n(tools/context_fetcher.py)"]
+    CF["4. SystemContextFetcher\n(tools/context_fetcher.py)"]
     OH["openHAB Server\n(REST API)"]
-    GR["Generated rules\n(generated_rules/*.rules)"]
+    GR["8. Generated openHAB rules\n(generated_rules/*.rules)"]
   end
 
   subgraph C["MCP Server (optional)"]
