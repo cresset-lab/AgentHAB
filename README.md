@@ -1,13 +1,13 @@
 # openHABAgents
 
-openHABAgents is an AI-driven toolkit that turns natural language automation requests into executable openHAB DSL rules. It couples an iterative generation and validation loop with direct openHAB integration so you can move from intent to live automation quickly and safely.
+openHABAgents is an AI-driven toolkit that turns natural language automation requests into executable openHAB DSL rules. It couples an iterative generation and validation loop with live openHAB context (via the bundled MCP server) so you can move from intent to live automation quickly and safely.
 
 ## Overview
 
 The repository bundles two primary components:
 
-1. **Python Agents** (`main.py`) - Orchestrates retrieval-augmented rule generation, iterative validation against live openHAB state, and file management for `.rules` artifacts. The agents use `OpenHABClient` directly as a Python library.
-2. **MCP Server** (`openhab-mcp/`) - Optional standalone Model Context Protocol server for Claude Desktop and Cursor/Cline integration. This is **NOT** used by the Python agents.
+1. **Python Agents** (`main.py`) - Orchestrate retrieval-augmented rule generation, iterative validation against live openHAB state, and file management for `.rules` artifacts. The agents talk to openHAB **indirectly via the bundled MCP server** to fetch items, things, and existing rules, and can optionally deploy validated rules back through the same server.
+2. **MCP Server** (`openhab-mcp/`) - Model Context Protocol server for both the Python agents **and** Claude Desktop / Cursor / Cline integration. It wraps the openHAB REST API and exposes tools for listing items/things/rules and for rule deployment.
 
 ## Key Features
 
@@ -87,9 +87,10 @@ Successful runs write each generated rule to a separate `.rules` file in `genera
 
 ### Optional: MCP Server for Claude/Cursor Integration
 
-The MCP server (`openhab-mcp/`) is **separate** from the Python agents and only needed if you want to use Claude Desktop or Cursor/Cline to interact with openHAB through natural language.
+The MCP server (`openhab-mcp/`) is shared between:
 
-**The Python agents do NOT use the MCP server** - they connect directly to openHAB via `OpenHABClient`.
+- The **Python agents**, which launch it as a local MCP stdio server to retrieve live system state (items, things, rules) and validate generated rules against your real installation.
+- **Claude Desktop / Cursor / Cline**, which can connect to the same server to let you inspect and control openHAB via natural language inside your IDE.
 
 To set up MCP integration for Claude/Cursor:
 1. See `openhab-mcp/README.md` for detailed instructions
@@ -110,8 +111,8 @@ openHABAgents/
 │   ├── openhab_syntax.md
 │   └── tutorials.md
 ├── generated_rules/              # Default output directory (created on demand)
-├── openhab-mcp/                  # MCP server (optional, for Claude/Cursor)
-│   ├── openhab_client.py         # OpenHAB REST API client (used by agents)
+├── openhab-mcp/                  # MCP server (used by agents and IDE integrations)
+│   ├── openhab_client.py         # OpenHAB REST API client (used by MCP server)
 │   ├── models.py                 # Data models for items, things, rules
 │   ├── openhab_mcp_server.py     # MCP server implementation
 │   └── docker-compose.macos.yml  # Run openHAB in Docker
@@ -216,16 +217,17 @@ flowchart TD
 
 1. **Context retrieval**: `tools/context_loader.load_contexts` ingests markdown files from `context/`, splits them with LangChain, and exposes a BM25 retriever for relevant documentation.
 
-2. **Live system context** (optional): When `OPENHAB_URL` and `OPENHAB_API_TOKEN` are configured:
-   - `SystemContextFetcher` uses `OpenHABClient` (as a Python library) to fetch all items, things, and rules
-   - Loads previously generated rules from `generated_rules/` directory
-   - Provides complete system state for validation
+2. **Live system context via MCP** (optional): When `OPENHAB_URL` and `OPENHAB_API_TOKEN` are configured:
+   - `SystemContextFetcher` launches the bundled MCP server (`openhab-mcp/openhab_mcp_server.py`) as a local stdio server.
+   - Through MCP tools it fetches all items, things, and rules from your openHAB instance.
+   - It also loads previously generated rules from the `generated_rules/` directory.
+   - The result is a unified `SystemContext` object used for validation and conflict detection.
 
-3. **Prompt assembly**: `PromptBuilder` collates the request, retrieved documentation snippets, live system context, and accumulated validator feedback.
+3. **Prompt assembly**: `PromptBuilder` collates the request, retrieved documentation snippets, live system context (if available), and accumulated validator feedback.
 
-4. **AI generation**: `PolicyGeneratorAgent` invokes `gpt-4o-mini` to synthesize a candidate `.rules` file, guided by documentation context and aware of available items.
+4. **AI generation**: `PolicyGeneratorAgent` invokes `gpt-4o-mini` to synthesize a candidate `.rules` file, guided by documentation context and aware of available items and existing rules.
 
-5. **Context-aware validation**: `ContextValidatorAgent` checks the candidate rule against live system state:
+5. **Context-aware validation**: `ContextValidatorAgent` checks the candidate rule against the `SystemContext`:
    - ✓ Verifies all referenced items exist in openHAB
    - ✓ Checks item type compatibility (e.g., can't dim a Switch)
    - ✓ Detects conflicts with existing rules (duplicate triggers, contradictory actions)
@@ -236,7 +238,7 @@ flowchart TD
 
 7. **Iterative refinement**: If validation fails, feedback is incorporated and the generation-validation loop continues up to `GENERATION_MAX_ATTEMPTS` times.
 
-8. **Persistence**: Each rule in the validated output is parsed and saved to its own `.rules` file via `tools.loader.save_rule`, respecting `OPENHAB_RULES_DIR` and the `--out` filename prefix.
+8. **Persistence**: Each rule in the validated output is parsed and saved to its own `.rules` file via `tools.loader.save_rule`, respecting `OPENHAB_RULES_DIR` and the `--out` filename prefix. These local `.rules` files are also fed back into the next run’s `SystemContext` for conflict detection.
 
 ## Custom Context
 
@@ -253,16 +255,16 @@ Tailor the retrieval corpus to mirror your installation:
 **Required:**
 - `OPENAI_API_KEY` - OpenAI API key for LangChain (GPT-4o-mini model)
 
-**For Context-Aware Validation:**
+**For Context-Aware Validation (via MCP):**
 - `OPENHAB_URL` - openHAB instance URL (e.g., `http://localhost:8080` or `http://localhost:18080` for Docker)
 - `OPENHAB_API_TOKEN` - API token from openHAB (Settings → API Security)
-- `ENABLE_CONTEXT_VALIDATION` - Enable/disable live validation (default: `true` if URL/token set)
+- `ENABLE_CONTEXT_VALIDATION` - Enable/disable live validation (default: `true` if URL/token set). When enabled, `SystemContextFetcher` will launch the MCP server to pull items, things, and rules.
 
 **Optional:**
 - `GENERATION_MAX_ATTEMPTS` - Maximum retry attempts (default: `3`)
 - `OPENHAB_RULES_DIR` - Output directory for `.rules` files (default: `generated_rules/`)
-
-**Note:** The `OPENHAB_MCP_URL` and `OPENHAB_MCP_TOKEN` variables are NOT used by the Python agents. See `openhab-mcp/README.md` for MCP server configuration.
+- `OPENHAB_MCP_COMMAND` / `OPENHAB_MCP_ARGS` - Override how the MCP server is launched (advanced).
+- `OPENHAB_MCP_URL` and `OPENHAB_MCP_TOKEN` / `OPENHAB_STAGING_TOKEN` - Configure the HTTP endpoint and auth token used for **rule deployment** via `tools.mcp_client.deploy_rule_via_mcp`. If unset, deployment is skipped but local `.rules` files are still written.
 
 ### Command-line Summary
 
