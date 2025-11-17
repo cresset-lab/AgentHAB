@@ -10,8 +10,8 @@ flowchart TD
   subgraph A["OpenHAB Python Agents CLI"]
     U["1. Natural language rule<br/>User via CLI"] --> M["2. main.py<br/>CLI entrypoint"]
     M --> PG["5. PolicyGeneratorAgent<br/>agents/policy_generator.py"]
-    M --> CV["6. ContextValidatorAgent<br/>agents/context_validator.py"]
-    M --> SV["7. ValidatorAgent<br/>agents/validator_agent.py"]
+    M --> SV["6. ValidatorAgent<br/>Syntax validation<br/>agents/validator_agent.py"]
+    M --> CV["7. ContextValidatorAgent<br/>Context-aware validation<br/>agents/context_validator.py"]
   end
 
   subgraph B["Context and System State"]
@@ -39,9 +39,9 @@ flowchart TD
 
   R -->|"relevant snippets"| PG
   PG -->|"rule candidates"| M
-  M -->|"context-aware checks"| CV
-  M -->|"syntax validation"| SV
-  SV -->|"save approved rules"| GR
+  M -->|"syntax validation first"| SV
+  SV -->|"if syntax valid"| CV
+  CV -->|"save approved rules"| GR
 
   %% MCP integration path (separate from Python agents)
   IDE --> MCP
