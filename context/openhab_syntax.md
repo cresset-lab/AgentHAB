@@ -1,5 +1,12 @@
 # openHAB Rule DSL Quick Syntax
 
+rule "<RULE_NAME>"
+when
+    <TRIGGER_CONDITION> [or <TRIGGER_CONDITION2> [or ...]]
+then
+    <SCRIPT_BLOCK>
+end
+
 - rule "Name"
 - when <trigger>
 - then <actions>
