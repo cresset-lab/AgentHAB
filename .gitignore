@@ -28,8 +28,7 @@ dist/
 
 .env
 
-# Generated rules (do not commit)
-generated_rules/
+
 
 # Python bytecode caches anywhere
 **/__pycache__/
