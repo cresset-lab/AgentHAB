@@ -1,0 +1,12 @@
+```text
+rule "Turn off coffee maker when user is away or on vacation"
+when
+    Item User_Status changed
+then
+    if (User_Status.state == "Away" || User_Status.state == "Vacation") {
+        if (CoffeeMaker.state != OFF) {
+            sendCommand(CoffeeMaker, OFF)
+        }
+    }
+end
+```

@@ -1,0 +1,11 @@
+```java
+rule "Send Voice Message and Control TV on Thursday"
+when
+    Item SendVoiceMessage changed to ON
+then
+    val now = new DateTimeType(nav())
+    if (now.getHourOfDay() >= 0 && now.getHourOfDay() < 24 && now.getDayOfWeek().getAsText().equals("Thursday")) {
+        sendCommand(TV_Item, ON)
+    }
+end
+```

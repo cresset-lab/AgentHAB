@@ -1,0 +1,8 @@
+```java
+rule "Activate Water Valve on Sprinkler"
+when
+    Item FireSprinkler changed to ON
+then
+    WaterValve.sendCommand(ON)
+end
+```

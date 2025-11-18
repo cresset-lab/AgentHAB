@@ -1,0 +1,10 @@
+```text
+rule "Turn off Air Conditioner when Heater is on"
+when
+    Item Heater changed to ON
+then
+    if (AirConditioner.state != OFF) {
+        sendCommand(AirConditioner, OFF)
+    }
+end
+```

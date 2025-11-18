@@ -1,0 +1,10 @@
+```text
+rule "Turn off Gas Stove when User is Away, on Vacation, or Sleeping"
+when
+    Item User_Status changed to "Away" or
+    Item User_Status changed to "Vacation" or
+    Item User_Status changed to "Sleeping"
+then
+    GasStove.sendCommand(OFF)
+end
+```

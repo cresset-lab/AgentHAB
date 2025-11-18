@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "request": "If User Away, on Vacation or Sleeping Then Door is Locked.",
+    "openhab_code": "```java\nrule \"Lock Door When User is Away or on Vacation or Sleeping\"\nwhen\n    Item UserStatus changed\nthen\n    if (UserStatus.state == \"Away\" || UserStatus.state == \"Vacation\" || UserStatus.state == \"Sleeping\") {\n        sendCommand(DoorLock, ON)\n    } else {\n        sendCommand(DoorLock, OFF)\n    }\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule syntax is correct and logically structured.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/1.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 2,
+    "request": "If User Away, on Vacation or Sleeping Then Gas Stove is off.",
+    "openhab_code": "```java\nrule \"Control Gas Stove Based on User Mode\"\nwhen\n    Item UserAway changed to ON or\n    Item UserVacation changed to ON or\n    Item UserSleeping changed to ON\nthen\n    sendCommand(GasStove, OFF)\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule syntax and structure are correct.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/2.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 3,
+    "request": "If Fire Sprinkler is on Then Water Valve is on.",
+    "openhab_code": "```ruby\nrule \"Control Water Valve Based on Fire Sprinkler\"\nwhen\n    Item Fire_Sprinkler received command ON\nthen\n    sendCommand(Water_Valve, ON)\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule has correct syntax and structure.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/3.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 4,
+    "request": "If User Away or on Vacation Then Induction Cooktop is off.",
+    "openhab_code": "```java\nrule \"Turn Off Induction Cooktop When User Away or on Vacation\"\nwhen\n    Item UserAway changed to ON or\n    Item UserVacation changed to ON\nthen\n    sendCommand(InductionCooktop, OFF)\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The ESA code has valid syntax and structure.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/4.rules",
+    "attempts_used": 3
+  },
+  {
+    "id": 5,
+    "request": "If User Away or on Vacation Then Coffee Maker is off.",
+    "openhab_code": "```java\nrule \"Turn off Coffee Maker when user is Away or on Vacation\"\nwhen\n    Item UserAway changed to ON or Item UserOnVacation changed to ON\nthen\n    sendCommand(CoffeeMaker, OFF)\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule syntax is correct and structurally sound.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/5.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 6,
+    "request": "If Heater is on Then Air Conditioner is off.",
+    "openhab_code": "```java\nrule \"Control Air Conditioner Based on Heater Status\"\nwhen\n    Item Heater changed to ON\nthen\n    sendCommand(AirConditioner, OFF)\nend\n\nrule \"Reset Air Conditioner When Heater is Off\"\nwhen \n    Item Heater changed to OFF\nthen\n    sendCommand(AirConditioner, ON)\nend\n```",
+    "is_valid": false,
+    "validator_summary": "The second rule is missing an action.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/6.rules",
+    "attempts_used": 3
+  },
+  {
+    "id": 7,
+    "request": "Turn off the gas stove, if the smoke is detected.",
+    "openhab_code": "```java\nrule \"Turn Off Gas Stove on Smoke Detection\"\nwhen\n    Item SmokeSensor changed to ON\nthen\n    sendCommand(GasStove,OFF)\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The code is syntactically correct.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/7.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 8,
+    "request": "Turn on the heater, if the temperature is below the threshold.",
+    "openhab_code": "```java\nrule \"Turn on Heater when Temperature is Low\"\nwhen\n    Item Temperature changed\nthen\n    if (Temperature.state < desiredThreshold) {\n        sendCommand(Heater, ON)\n    }\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule is syntactically correct and follows the proper structure.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/8.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 9,
+    "request": "The lights (in a bedroom, hallway, etc.) must be turned on if the motion sensor is active.",
+    "openhab_code": "```java\nrule \"Turn on lights when motion is detected\"\nwhen\n    Item MotionSensor changed to ON\nthen\n    sendCommand(BedroomLight, ON)\n    sendCommand(HallwayLight, ON)\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The code syntax and structure are correct.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/9.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 10,
+    "request": "When sending a voice message if it is on Thursday then turn on the TV.",
+    "openhab_code": "```java\nrule \"Send Voice Message and Control TV on Thursday\"\nwhen\n    Item SendVoiceMessage changed to ON\nthen\n    val now = new DateTimeType(nav())\n    if (now.getHourOfDay() >= 0 && now.getHourOfDay() < 24 && now.getDayOfWeek().getAsText().equals(\"Thursday\")) {\n        sendCommand(TV_Item, ON)\n    }\nend\n```",
+    "is_valid": false,
+    "validator_summary": "Incorrect method used to obtain the current DateTime instance.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/10.rules",
+    "attempts_used": 3
+  },
+  {
+    "id": 11,
+    "request": "Allow sending SMS only if it is requested by flood-alert or energy-alerts or humidity-alert or mail-arrived or medicine-reminder or presence-change-text or ready-for-rain or laundry-monitor apps.",
+    "openhab_code": "```java\nrule \"Send SMS Alerts\"\nwhen\n    Item flood-alert received command ON or\n    Item energy-alerts received command ON or\n    Item humidity-alert received command ON or\n    Item mail-arrived received command ON or\n    Item medicine-reminder received command ON or\n    Item presence-change-text received command ON or\n    Item ready-for-rain received command ON or\n    Item laundry-monitor received command ON\nthen\n    sendCommand(SMSItem, \"Alert notification triggered.\")\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The code is syntactically valid and structurally sound.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/11.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 12,
+    "request": "Allow unlocking the front door only if it is requested by enhanced-auto-lock-door app.",
+    "openhab_code": "```yaml\nrule \"Unlock Front Door Only by Enhanced Auto Lock Door App\"\nwhen\n    Item unlockFrontDoor received command ON\nthen\n    if (frontDoorLock.state == ON && unlockFrontDoor.lastAction == APP) {\n        sendCommand(frontDoorLock, OFF)  // Command to unlock the front door\n    } else {\n        logInfo(\"DoorSecurity\", \"Unauthorized access attempt to unlock the front door.\")\n    }\nend\n```",
+    "is_valid": false,
+    "validator_summary": "Malformed condition in the if statement regarding lastAction.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/12.rules",
+    "attempts_used": 3
+  },
+  {
+    "id": 13,
+    "request": "Allow water valve to be closed only if the fire-sprinkler was not on in the last 5 hours.",
+    "openhab_code": "```dsl\nrule \"Close Water Valve if Sprinkler Off for 5 Hours\"\nwhen\n    Item FireSprinkler changed to OFF\nthen\n    if (FireSprinkler.lastUpdate == null || now.minusHours(5).isAfter(FireSprinkler.lastUpdate.toDate())) {\n        sendCommand(WaterValve, OFF)\n        logInfo(\"Water Valve\", \"Water valve closed as fire-sprinkler has been off for at least 5 hours.\")\n    } else {\n        logInfo(\"Water Valve\", \"Cannot close water valve as fire-sprinkler was on in the last 5 hours.\")\n    }\nend\n```",
+    "is_valid": false,
+    "validator_summary": "The condition may lead to unreachable code due to potential null access issues.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/13.rules",
+    "attempts_used": 3
+  },
+  {
+    "id": 14,
+    "request": "Allow water valve to be closed only if water leak sensor sensed wet within 1 minute.",
+    "openhab_code": "```javascript\nrule \"Close Water Valve on Leak Detection\"\nwhen\n    Item WaterLeakSensor changed to ON\nthen\n    createTimer(now.plusMinutes(1), [|\n        // Check if the Water Leak Sensor remains wet after 1 minute\n        if (WaterLeakSensor.state == ON) {\n            logInfo(\"watervalve\", \"Water leak detected; closing water valve.\")\n            sendCommand(WaterValve, OFF); // Close the water valve on continued leak\n        } else {\n            logInfo(\"watervalve\", \"No leak detected after 1 minute; no action required.\")\n        }\n    ])\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule is syntactically correct.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/14.rules",
+    "attempts_used": 2
+  },
+  {
+    "id": 15,
+    "request": "Allow any light to be turned on only if the system is not on vacation mode.",
+    "openhab_code": "```ruby\nrule \"Control Lights Depends on Vacation Mode\"\nwhen\n    Item Vacation_Mode changed\nthen\n    if (Vacation_Mode.state == OFF) {\n        logInfo(\"Lights\", \"The system is not in vacation mode, lights can be turned on.\")\n    } else {\n        logInfo(\"Lights\", \"The system is in vacation mode, lights cannot be turned on.\")\n    }\nend\n\nrule \"Turn On Light\"\nwhen\n    Item Light_Switch received command ON\nthen\n    if (Vacation_Mode.state == OFF) {\n        logInfo(\"Light Control\", \"Turning on the light.\")\n        sendCommand(Light_Switch, ON)\n    } else {\n        logInfo(\"Light Control\", \"Cancelling light activation; system is in vacation mode.\")\n    }\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rules are syntactically correct and logically structured.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/15.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 16,
+    "request": "Allow light to be switched on only if user is at home.",
+    "openhab_code": "```java\nrule \"Enable Light Only When User is Home\"\nwhen\n    Item UserPresence changed to HOME\nthen\n    if (UserLightSensor.state == OFF) {\n        sendCommand(UserLight, ON)\n    }\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule is syntactically valid and well-structured.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/16.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 17,
+    "request": "Allow hallway light to get turned on only if the hallway motion sensor has tripped within 20 sec.",
+    "openhab_code": "```java\nrule \"Hallway Light Control\"\nwhen\n    Item HallwayMotionSensor changed to ON\nthen\n    createTimer(now.plusSeconds(20), [|\n        if (HallwayMotionSensor.state == ON) {\n            sendCommand(HallwayLight, ON)\n        }\n    ])\nend\n\nrule \"Turn Off Hallway Light After Motion\"\nwhen\n    Item HallwayMotionSensor changed to OFF\nthen\n    sendCommand(HallwayLight, OFF)\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The code is syntactically valid and structurally sound.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/17.rules",
+    "attempts_used": 1
+  },
+  {
+    "id": 18,
+    "request": "Allow AC to be switched on only if the heater is off.",
+    "openhab_code": "```java\nrule \"Control AC Based on Heater State\"\nwhen\n    Item Heater_Switch received command OFF\nthen\n    sendCommand(AC_Switch, ON)\n    logInfo(\"AC Control\", \"AC has been turned on because the heater is off.\")\nend\n```",
+    "is_valid": false,
+    "validator_summary": "Unable to decode validator response.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/18.rules",
+    "attempts_used": 3
+  },
+  {
+    "id": 19,
+    "request": "Allow living room window to be opened only if both heater and AC are off.",
+    "openhab_code": "```java\nrule \"Allow Living Room Window Open Check\"\nwhen\n    Item LivingRoomWindow received command OPEN\nthen\n    if (Heater.state == OFF && AC.state == OFF) {\n        // Allowed to open window\n        logInfo(\"Window Control\", \"The living room window has been opened.\")\n    } else {\n        // Deny opening the window\n        sendCommand(LivingRoomWindow, CLOSED)\n        logInfo(\"Window Control\", \"The window cannot be opened while heater or AC are on.\")\n    }\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The rule's syntax and structure are correct.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/19.rules",
+    "attempts_used": 2
+  },
+  {
+    "id": 20,
+    "request": "Allow turning off thermostat only if lastly it was on within 120 sec.",
+    "openhab_code": "```ruby\nrule \"Thermostat Off Control\"\nwhen\n    Item Thermostat_Switch received command OFF\nthen\n    val lastChange = Thermostat_Switch.lastUpdate\n    if (lastChange != null && now.minusSeconds(120).isBefore(lastChange)) {\n        // Proceed to turn off thermostat\n        sendCommand(Thermostat_Switch, OFF)\n        logInfo(\"Thermostat\", \"Thermostat switched off\")\n    } else {\n        // Do not turn off thermostat\n        logInfo(\"Thermostat\", \"Failed to switch off. Was not on within the last 120 seconds.\")\n    }\nend\n```",
+    "is_valid": true,
+    "validator_summary": "The provided rule is syntactically correct and structurally sound.",
+    "rules_path": "generated_rules/results/agents_workflow/syntax_only_context/20.rules",
+    "attempts_used": 1
+  }
+]

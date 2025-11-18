@@ -1,0 +1,8 @@
+```java
+rule "Control AC based on Heater status"
+when
+    Item Heater changed to ON
+then
+    AirConditioner.sendCommand(OFF)
+end
+```

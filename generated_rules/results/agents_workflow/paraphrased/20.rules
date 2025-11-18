@@ -1,0 +1,13 @@
+```text
+rule "Turn off thermostat if it was on within the last 120 seconds"
+when
+    Item Thermostat received command OFF
+then
+    if (Thermostat.lastUpdate != null && now.minusSeconds(120).isBefore(Thermostat.lastUpdate)) {
+        // To do: Proceed with turning off the thermostat
+        Thermostat.sendCommand(OFF)
+    } else {
+        logInfo("Thermostat", "Request to turn off ignored, as it was last on more than 120 seconds ago.")
+    }
+end
+```

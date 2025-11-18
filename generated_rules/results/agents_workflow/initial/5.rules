@@ -1,0 +1,10 @@
+```text
+rule "Turn off Coffee Maker when User is Away or on Vacation"
+when
+    Item User_Status changed to "Away"
+    or
+    Item User_Status changed to "Vacation"
+then
+    Coffee_Maker.sendCommand(OFF)
+end
+```

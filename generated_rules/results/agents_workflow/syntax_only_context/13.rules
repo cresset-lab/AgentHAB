@@ -1,0 +1,13 @@
+```dsl
+rule "Close Water Valve if Sprinkler Off for 5 Hours"
+when
+    Item FireSprinkler changed to OFF
+then
+    if (FireSprinkler.lastUpdate == null || now.minusHours(5).isAfter(FireSprinkler.lastUpdate.toDate())) {
+        sendCommand(WaterValve, OFF)
+        logInfo("Water Valve", "Water valve closed as fire-sprinkler has been off for at least 5 hours.")
+    } else {
+        logInfo("Water Valve", "Cannot close water valve as fire-sprinkler was on in the last 5 hours.")
+    }
+end
+```

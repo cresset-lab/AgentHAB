@@ -1,0 +1,10 @@
+```less
+rule "Close Water Valve Only if Sprinkler is Off"
+when
+    Time cron "0 0/5 * * * ?" // Check every 5 minutes
+then
+    if (FireSprinkler.states == OFF && (now.minusHours(5).isAfter(FireSprinkler.lastChange))) {
+        sendCommand(WaterValve, OFF)
+    }
+end
+```

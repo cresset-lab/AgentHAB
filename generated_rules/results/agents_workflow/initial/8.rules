@@ -1,0 +1,12 @@
+```text
+rule "Turn on heater if temperature is below threshold"
+when
+    Item TemperatureSensor changed
+then
+    if (TemperatureSensor.state < 20) { // Example threshold
+        sendCommand(Heater, ON)
+    } else {
+        sendCommand(Heater, OFF)
+    }
+end
+```

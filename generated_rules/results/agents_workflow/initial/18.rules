@@ -1,0 +1,10 @@
+```text
+rule "Allow AC to switch on only if heater is off"
+when
+    Item AC_Switch received command ON
+then
+    if (Heater_Switch.state == OFF) {
+        sendCommand(AC_Switch, ON)
+    }
+end
+```

@@ -1,0 +1,10 @@
+```text
+rule "Turn off Induction Cooktop when User is Away or on Vacation"
+when
+    Item User_Status changed to "Away"
+    or
+    Item User_Status changed to "Vacation"
+then
+    sendCommand(Induction_Cooktop, OFF)
+end
+```

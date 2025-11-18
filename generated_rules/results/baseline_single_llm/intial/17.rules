@@ -1,0 +1,14 @@
+```scss
+rule "Turn on hallway light when motion is detected"
+when
+    Item HallwayMotionSensor changed to ON
+then
+    createTimer(now.plusSeconds(20), [ |
+        if(HallwayMotionSensor.state == ON) {
+            HallwayLight.sendCommand(ON)
+        } else {
+            HallwayLight.sendCommand(OFF)
+        }
+    ])
+end
+```

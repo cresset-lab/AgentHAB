@@ -1,0 +1,10 @@
+```text
+rule "Turn on TV when voice message is sent on Thursday"
+when
+    Item VoiceMessage received command
+then
+    if (now.getDayOfWeek() == java.time.DayOfWeek.THURSDAY) {
+        sendCommand(TV, ON)
+    }
+end
+```

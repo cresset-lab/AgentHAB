@@ -1,0 +1,11 @@
+```javascript
+rule "Secure Door When Away, On Vacation, or Sleeping"
+when
+    Item UserStatus changed
+then
+    if (UserStatus.state == "Away" || UserStatus.state == "On Vacation" || UserStatus.state == "Sleeping") {
+        Door_Control.sendCommand(                                       // Replace 'Door_Control' with the actual item name for your door lock
+            LOCK )                                                      // Command to lock the door
+    } 
+end
+```

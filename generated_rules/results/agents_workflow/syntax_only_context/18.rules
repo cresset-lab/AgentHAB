@@ -1,0 +1,9 @@
+```java
+rule "Control AC Based on Heater State"
+when
+    Item Heater_Switch received command OFF
+then
+    sendCommand(AC_Switch, ON)
+    logInfo("AC Control", "AC has been turned on because the heater is off.")
+end
+```

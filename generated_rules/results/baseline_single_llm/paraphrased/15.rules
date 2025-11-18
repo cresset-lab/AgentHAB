@@ -1,0 +1,14 @@
+```java
+rule "Enable light only when not in vacation mode"
+when
+    Member of gLights received command ON
+then
+    if (VacationMode.state == OFF) {
+        // Allow the light to turn on
+        // Include additional logic if necessary
+    } else {
+        // Cancel the light ON command if in vacation mode
+        member.sendCommand(OFF)
+    }
+end
+```

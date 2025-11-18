@@ -1,0 +1,14 @@
+```javascript
+_rule "Allow Opening Living Room Window"
+when
+    Item Heater_Switch changed
+    or
+    Item AC_Switch changed
+then
+    if (Heater_Switch.state == OFF && AC_Switch.state == OFF) {
+        livingRoomWindow_Window_Can_Open.sendCommand(ON)
+    } else {
+        livingRoomWindow_Window_Can_Open.sendCommand(OFF)
+    }
+end
+```

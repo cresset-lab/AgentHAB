@@ -1,0 +1,10 @@
+```java
+rule "Control Gas Stove Based on User State"
+when
+    Item User_Status received update
+then
+    if (User_Status.state == "Away" || User_Status.state == "Vacation" || User_Status.state == "Sleeping") {
+        Gas_Stove.sendCommand(OFF)
+    }
+end
+```

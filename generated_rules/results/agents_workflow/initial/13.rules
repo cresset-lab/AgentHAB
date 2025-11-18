@@ -1,0 +1,14 @@
+```text
+rule "Close water valve if fire-sprinkler is off"
+when
+    Item WaterValve received command OFF
+then
+    val lastSprinklerStateTime = FireSprinklerLastState.lastUpdate
+    if (lastSprinklerStateTime != null && now.minusHours(5).isBefore(lastSprinklerStateTime)) {
+        logInfo("rules.fire_safe", "Water valve close command rejected: Fire sprinklers were active in the last 5 hours.")
+    } else {
+        sendCommand(WaterValve, OFF)
+        logInfo("rules.fire_safe", "Water valve closed.")
+    }
+end
+```

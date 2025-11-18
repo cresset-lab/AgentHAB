@@ -1,0 +1,19 @@
+```java
+rule "Send SMS Alert on Custom Request"
+when
+    OR
+        Item flood-alert received update
+        Item energy-alerts received update
+        Item humidity-alert received update
+        Item mail-arrived received update
+        Item medicine-reminder received update
+        Item presence-change-text received update
+        Item ready-for-rain received update
+        Item laundry-monitor received update
+then
+    if (getSenderToken() !== null) {
+        val String message = "Alert received: " + triggeringItem.name
+        sendSMS(getSenderToken(), message)
+    }
+end
+```

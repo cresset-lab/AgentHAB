@@ -1,0 +1,12 @@
+```java
+rule "Control Coffee Maker Based on User Occupancy"
+when
+    Member of gUserStatus changed   
+then
+    if (gUserStatus.statesContain(Situation_Away) || gUserStatus.statesContain(Situation_Vacation)) {
+        Coffee_Maker.sendCommand(OFF)
+    } else {
+        Coffee_Maker.sendCommand(ON)
+    }
+end
+```

@@ -1,0 +1,13 @@
+```text
+rule "Close water valve if leak detected"
+when
+    Item WaterLeakSensor changed to WET
+then
+    createTimer(now.plusMinutes(1), [ |
+        // After 1 minute, check leak status
+        if (WaterLeakSensor.state == WET) {
+            sendCommand(WaterValve, CLOSED)
+        }
+    ])
+end
+```

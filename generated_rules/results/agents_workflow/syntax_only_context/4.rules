@@ -1,0 +1,9 @@
+```java
+rule "Turn Off Induction Cooktop When User Away or on Vacation"
+when
+    Item UserAway changed to ON or
+    Item UserVacation changed to ON
+then
+    sendCommand(InductionCooktop, OFF)
+end
+```

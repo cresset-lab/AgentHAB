@@ -1,0 +1,12 @@
+```text
+rule "Turn on light when motion detected only if user is home"
+when
+    Item MotionSensor changed to ON
+then
+    if (UserPresence.state == ON) {
+        if (Light_Switch.state != ON) {
+            sendCommand(Light_Switch, ON)
+        }
+    }
+end
+```

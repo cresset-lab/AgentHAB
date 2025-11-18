@@ -1,0 +1,15 @@
+```text
+rule "Send SMS on Alert Request"
+when
+    Item flood-alert received command ON or
+    Item energy-alerts received command ON or
+    Item humidity-alert received command ON or
+    Item mail-arrived received command ON or
+    Item medicine-reminder received command ON or
+    Item presence-change-text received command ON or
+    Item ready-for-rain received command ON or
+    Item laundry-monitor received command ON
+then
+    sendCommand(SMSSender, "Send SMS as requested")
+end
+```

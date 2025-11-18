@@ -1,0 +1,11 @@
+```text
+rule "Lock door when user is away, on vacation, or sleeping"
+when
+    Item User_Status changed
+then
+    if (User_Status.state == "Away" || User_Status.state == "On Vacation" || User_Status.state == "Sleeping") {
+        logInfo("rules.doorLock", "Locking the door as the user is " + User_Status.state)
+        sendCommand(Door_Lock, LOCK)
+    }
+end
+```

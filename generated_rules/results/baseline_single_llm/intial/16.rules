@@ -1,0 +1,10 @@
+```java
+rule "Switch on Light if User is at Home"
+when
+    Item UserPresence changed to ON
+then
+    if (UserPresence.state == ON) {
+        Light.sendCommand(ON)
+    }
+end
+```

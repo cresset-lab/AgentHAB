@@ -1,0 +1,15 @@
+```java
+rule "Enforce Window Opening Restrictions"
+when
+    Item Heater received update ON or
+    Item AC received update ON
+then
+    if (Heater.state == OFF && AC.state == OFF) {
+        // Allow window opening logic here
+        sendNotification("Living Room window can be opened.")
+    } else {
+        // Logic to deny window opening here
+        sendNotification("Can't open Living Room window; Heater or AC is on.")
+    }
+end
+```

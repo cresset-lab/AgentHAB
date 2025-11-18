@@ -1,0 +1,12 @@
+```java
+rule "Unlock Front Door by Enhanced Auto Lock Door App"
+when
+    Item EnhancedAutoLockDoorAppRequested received command ON
+then
+    if (FrontDoorLock.state == LOCKED) {
+        sendCommand(FrontDoorLock, UNLOCK)
+    } else {
+        logInfo("DoorControl", "Front door is already unlocked.")
+    }
+end
+```

@@ -1,0 +1,12 @@
+```java
+rule "Control AC and Heater"
+when
+    Item Heater_state changed to OFF
+then
+    if (AC_state.state == OFF) {
+        AC_state.sendCommand(ON)
+    } else {
+        logInfo("AC Control", "AC cannot be turned on while the heater is running.")
+    }
+end
+```

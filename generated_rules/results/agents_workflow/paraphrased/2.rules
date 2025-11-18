@@ -1,0 +1,10 @@
+```text
+rule "Turn off gas stove when user is Away, on Vacation, or Sleeping"
+when
+    Item User_Status changed
+then
+    if (User_Status.state == "Away" || User_Status.state == "Vacation" || User_Status.state == "Sleeping") {
+        sendCommand(GasStove, OFF)
+    }
+end
+```

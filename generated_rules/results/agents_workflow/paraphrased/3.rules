@@ -1,0 +1,10 @@
+```text
+rule "Turn on water valve when fire sprinkler is activated"
+when
+    Item FireSprinklerSensor changed to ON
+then
+    if (WaterValve.state != ON) {
+        sendCommand(WaterValve, ON)
+    }
+end
+```

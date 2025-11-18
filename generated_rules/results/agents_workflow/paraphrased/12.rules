@@ -1,0 +1,13 @@
+```text
+rule "Unlock front door only from enhanced auto-lock app"
+when
+    Item FrontDoor_UNLOCK received command ON
+then
+    if (triggeringItem == Enhanced_Auto_Lock_Door_App) {
+        sendCommand(FrontDoor_Lock, OFF)
+        logInfo("rules.frontdoor", "Front door unlocked via enhanced auto-lock app.")
+    } else {
+        logWarn("rules.frontdoor", "Unlock command rejected; improper source.")
+    }
+end
+```

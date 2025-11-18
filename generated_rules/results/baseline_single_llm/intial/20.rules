@@ -1,0 +1,23 @@
+```java
+rule "Allow Turning Off Thermostat with Time Condition"
+when
+    Item Thermostat_State changed to OFF
+then
+    if (Thermostat_Last_Activated.state == ON && now.minusSeconds(120).isBefore(Thermostat_Time_Last_Activated.state)) {
+        // Proceed to turn off
+        logInfo("Thermostat", "Thermostat turned off successfully.")
+        // Here you can add code to physically turn off the thermostat if necessary
+    } else {
+        // Prevent turning off if condition is not met
+        Thermostat.postUpdate(ON)
+        logInfo("Thermostat", "Failed to turn off the thermostat: Not on for 120 seconds")
+    }
+end
+
+rule "Track Thermostat ON state"
+when
+    Item Thermostat_State changed to ON
+then
+    Thermostat_Time_Last_Activated.postUpdate(now)
+end
+```

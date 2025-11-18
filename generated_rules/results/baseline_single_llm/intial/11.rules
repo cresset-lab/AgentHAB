@@ -1,0 +1,16 @@
+```scala
+rule "Send SMS on specific alerts"
+when
+    Item floodAlert received command ON or
+    Item energyAlert received command ON or 
+    Item humidityAlert received command ON or
+    Item mailArrived received command ON or
+    Item medicineReminder received command ON or
+    Item presenceChangeText received command ON or
+    Item readyForRain received command ON or
+    Item laundryMonitor received command ON
+then
+    // Replace with the appropriate action to send SMS, implemented according to your setup.
+    sendSMS("Your mobile number", "Alert received. Please check.")
+end
+```

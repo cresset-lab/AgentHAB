@@ -1,0 +1,12 @@
+```java
+rule "Turn on TV on Voice Message Sent Thursday"
+when
+    Channel voiceMessage # Event received (adjust with proper communication channel details)
+then
+    val currentDateTime = ZonedDateTime.now()
+    
+    if(currentDateTime.getDayOfWeek() == DayOfWeek.THURSDAY) {
+        sendCommand(TV, ON)
+    }
+end
+```

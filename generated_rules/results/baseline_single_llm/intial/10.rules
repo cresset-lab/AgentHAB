@@ -1,0 +1,10 @@
+```dsl
+rule "Turn on TV on voice message Thursday"
+when
+    VoiceMessageReceived  // This is an imaginary trigger. Replace as per context/binding.
+then
+    if (now.getDayOfWeek() == 4) {  // 4 corresponds to Thursday
+        TV.sendCommand(ON)  // Assuming 'TV' is your item for the TV.
+    }
+end
+```

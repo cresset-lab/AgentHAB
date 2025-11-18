@@ -1,0 +1,16 @@
+```java
+rule "Allow thermostat to turn off only within 120 seconds"
+when
+    Item Thermostat_Status changed to OFF
+then
+    // Checks the last status change time of the Thermostat
+    val lastUpdate = Thermostat_Status.lastChange
+    if (lastUpdate !== null && now.minusSeconds(120).isBefore(lastUpdate.millis)) {
+        logInfo("Thermostat", "Thermostat turned off within allowable time frame.")
+    } else {
+        // Cancel the OFF command since the thermostat was not on in the last 120 seconds
+        logWarn("Thermostat", "Thermostat cannot be turned off, it was not on for the last 120 seconds.")
+        Thermostat_Status.sendCommand(ON) // Assumes you have to turn back ON
+    }
+end
+```

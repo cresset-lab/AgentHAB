@@ -1,0 +1,12 @@
+```java
+rule "Lock Door When User is Away or on Vacation or Sleeping"
+when
+    Item UserStatus changed
+then
+    if (UserStatus.state == "Away" || UserStatus.state == "Vacation" || UserStatus.state == "Sleeping") {
+        sendCommand(DoorLock, ON)
+    } else {
+        sendCommand(DoorLock, OFF)
+    }
+end
+```

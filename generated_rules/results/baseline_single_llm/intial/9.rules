@@ -1,0 +1,10 @@
+```java
+rule "Turn on lights with motion detection"
+when
+    Item MotionSensor changed to ON
+then
+    // Specify the lights to turn on:
+    BedroomLight.sendCommand(ON)
+    HallwayLight.sendCommand(ON)
+end
+```

@@ -1,0 +1,13 @@
+```text
+rule "Turn on lights when motion detected"
+when
+    Item MotionSensor changed to ON
+then
+    if (Bedroom_Light.state != ON) {
+        sendCommand(Bedroom_Light, ON)
+    }
+    if (Hallway_Light.state != ON) {
+        sendCommand(Hallway_Light, ON)
+    }
+end
+```

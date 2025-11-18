@@ -1,0 +1,14 @@
+```javascript
+rule "Close Water Valve on Leak Detection"
+when
+    Item WaterLeakSensor changed to ON // Sensor triggered
+then
+    // create a timer for 1 minute
+    var Timer closeValveTimer = t.createTimer(now.plusMinutes(1), [ |
+        // close the water valve if sensor state is ON within the past minute
+        if (WaterLeakSensor.state == ON) {
+            WaterValve.sendCommand(OFF) // Close the water valve
+        }
+    ])
+end
+```

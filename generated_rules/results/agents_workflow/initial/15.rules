@@ -1,0 +1,14 @@
+```text
+rule "Allow light to be turned on only when not in vacation mode"
+when
+    Member of AllLights received command ON
+then
+    if (Vacation_Mode.state != ON) {
+        // Only proceed if it's not in vacation mode
+        val lightItem = triggeringItem
+        sendCommand(lightItem, ON)
+    } else {
+        logInfo("rules.vacation", "Attempted to turn on " + triggeringItem.name + " while in vacation mode.")
+    }
+end
+```

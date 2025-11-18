@@ -1,0 +1,13 @@
+```text
+rule "Turn on hallway light if motion detected recently"
+when
+    Item HallwayMotionSensor changed to ON
+then
+    val lastDetected = HallwayMotionSensor.lastUpdate
+    if (lastDetected !== null && now - lastDetected < 20 * 1000) { // check if last detected time is within 20 seconds
+        if (HallwayLight.state != ON) {
+            sendCommand(HallwayLight, ON)
+        }
+    }
+end
+```

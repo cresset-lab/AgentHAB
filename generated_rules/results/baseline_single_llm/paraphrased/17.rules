@@ -1,0 +1,21 @@
+```javascript
+rule "Hallway Light Activation"
+when
+    Item Hallway_Motion_Sensor changed to ON
+then
+    createTimer(now.plusSeconds(20)) [ |
+        if (Hallway_Motion_Sensor.lastUpdate >= now.minusSeconds(20)) {
+            Hallway_Light.sendCommand(ON)
+        } else {
+            Hallway_Light.sendCommand(OFF)
+        }
+    ]
+end
+
+rule "Turn Off Hallway Light"
+when
+    Item Hallway_Motion_Sensor changed to OFF
+then
+    Hallway_Light.sendCommand(OFF)
+end
+```

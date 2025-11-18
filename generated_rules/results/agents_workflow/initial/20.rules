@@ -1,0 +1,12 @@
+```text
+rule "Turn off thermostat only if it was on recently"
+when
+    Item Thermostat received command OFF
+then
+    if (Thermostat.state == ON && now.minusSeconds(120).isBefore(Thermostat.lastUpdate)) {
+        sendCommand(Thermostat, OFF)
+    } else {
+        logInfo("rules.thermostat", "Thermostat cannot be turned off - not recently on.")
+    }
+end
+```

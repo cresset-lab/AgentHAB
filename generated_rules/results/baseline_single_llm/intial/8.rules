@@ -1,0 +1,8 @@
+```javascript
+rule "Turn on Heater if Temperature Below Threshold"
+when
+    Item TemperatureSensor changedto BELOW_THRESHOLD
+then
+    Heater.sendCommand(ON)
+end
+```

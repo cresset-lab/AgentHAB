@@ -1,0 +1,24 @@
+```ruby
+rule "Control Lights Depends on Vacation Mode"
+when
+    Item Vacation_Mode changed
+then
+    if (Vacation_Mode.state == OFF) {
+        logInfo("Lights", "The system is not in vacation mode, lights can be turned on.")
+    } else {
+        logInfo("Lights", "The system is in vacation mode, lights cannot be turned on.")
+    }
+end
+
+rule "Turn On Light"
+when
+    Item Light_Switch received command ON
+then
+    if (Vacation_Mode.state == OFF) {
+        logInfo("Light Control", "Turning on the light.")
+        sendCommand(Light_Switch, ON)
+    } else {
+        logInfo("Light Control", "Cancelling light activation; system is in vacation mode.")
+    }
+end
+```

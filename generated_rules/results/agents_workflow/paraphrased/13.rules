@@ -1,0 +1,28 @@
+```text
+import java.util.Date
+
+var Timer fireSprinklerTimer = null
+
+rule "Check Fire Sprinkler Status Before Closing Water Valve"
+when
+    Item WaterValve received command ON // Trigger when the water valve attempts to close
+then
+    if (fireSprinklerTimer !== null) {
+        fireSprinklerTimer.cancel() // Cancel existing timer if it exists
+        fireSprinklerTimer = null // Set to null to flag it's cancelled
+    }
+
+    // Initialize the time check for FireSprinkler
+    var boolean sprinklerActive = false 
+
+    if (now.minusHours(5).isBefore(FireSprinkler.timestamp)) { // Check if FireSprinkler was active in the last 5 hours
+        sprinklerActive = true 
+    }
+
+    if (!sprinklerActive) {
+        sendCommand(WaterValve, ON)   // Close the water valve only if fire sprinkler has not been active
+    } else {
+        logInfo("FireSprinklerRule", "Water valve cannot be closed due to sprinkler activity in the last 5 hours.")
+    }
+end
+```

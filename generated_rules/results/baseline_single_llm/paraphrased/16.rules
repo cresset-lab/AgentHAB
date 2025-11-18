@@ -1,0 +1,16 @@
+```java
+rule "Toggle Lights Based on User Presence"
+when
+    Member of gLights received command ON
+then
+    if (CurrentUserPresence.state == OPEN) { // Assuming CurrentUserPresence is an item linked to a presence sensor
+        sendCommand(notification, "The lights have been turned ON.")
+        // Assuming members of gLights is being handled here.
+        applyTransform("JSONPath", "$.command")  // (Optional) intended as HTTPS error control indication, adapt as needed
+        
+    } else {
+        sendCommand(receivedEvent.source, OFF)
+        sendCommand(notification, "Cannot turn ON lights, user not at home.")
+    }
+end
+```

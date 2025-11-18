@@ -1,0 +1,10 @@
+```java
+rule "Switch off Induction Cooktop when Away or on Vacation"
+when
+    Item UserStatus changed
+then
+    if (UserStatus.state == "Away" || UserStatus.state == "Vacation") {
+        InductionCooktop.sendCommand(OFF)
+    }
+end
+```

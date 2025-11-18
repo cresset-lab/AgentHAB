@@ -1,0 +1,15 @@
+```java
+rule "Allow Living Room Window Open Check"
+when
+    Item LivingRoomWindow received command OPEN
+then
+    if (Heater.state == OFF && AC.state == OFF) {
+        // Allowed to open window
+        logInfo("Window Control", "The living room window has been opened.")
+    } else {
+        // Deny opening the window
+        sendCommand(LivingRoomWindow, CLOSED)
+        logInfo("Window Control", "The window cannot be opened while heater or AC are on.")
+    }
+end
+```

@@ -1,0 +1,13 @@
+```java
+rule "Prevent Lights from Being Turned On in Vacation Mode"
+when
+    Item Lights received command ON
+then
+    if(VacationMode.state != ON) {
+        // Proceed to turn on the light
+    } else {
+        // Optionally create a log entry or alert
+        logInfo("Lights rule", "Attempt to turn on lights while in vacation mode blocked.");
+    }
+end
+```

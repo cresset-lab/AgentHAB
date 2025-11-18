@@ -1,0 +1,10 @@
+```java
+rule "Control Gas Stove Based on User Mode"
+when
+    Item UserAway changed to ON or
+    Item UserVacation changed to ON or
+    Item UserSleeping changed to ON
+then
+    sendCommand(GasStove, OFF)
+end
+```

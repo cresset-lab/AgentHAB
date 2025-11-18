@@ -1,0 +1,12 @@
+```text
+rule "Unlock front door only for enhanced-auto-lock-door app"
+when
+    Item Front_Door_Lock received command UNLOCK
+then
+    if (receivedCommand.source == "enhanced-auto-lock-door") {
+        sendCommand(Front_Door_Lock, UNLOCK)
+    } else {
+        logInfo("rules.door", "Unauthorised unlock attempt detected for " + triggeringItem.name)
+    }
+end
+```

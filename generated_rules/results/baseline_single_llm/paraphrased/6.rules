@@ -1,0 +1,8 @@
+```java
+rule "Turn off Air Conditioner when the Heater is ON"
+when
+    Item Heater received update ON
+then
+    AirConditioner.sendCommand(OFF)
+end
+```

@@ -1,0 +1,8 @@
+```text
+rule "AC control based on heater status"
+when
+    Item Heater changed to OFF
+then
+    sendCommand(AirConditioner, ON)
+end
+```

@@ -1,0 +1,10 @@
+```java
+rule "Enable Light Only When User is Home"
+when
+    Item UserPresence changed to HOME
+then
+    if (UserLightSensor.state == OFF) {
+        sendCommand(UserLight, ON)
+    }
+end
+```

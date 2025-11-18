@@ -1,0 +1,15 @@
+```java
+rule "Control Air Conditioner Based on Heater Status"
+when
+    Item Heater changed to ON
+then
+    sendCommand(AirConditioner, OFF)
+end
+
+rule "Reset Air Conditioner When Heater is Off"
+when 
+    Item Heater changed to OFF
+then
+    sendCommand(AirConditioner, ON)
+end
+```

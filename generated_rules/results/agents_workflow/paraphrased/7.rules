@@ -1,0 +1,8 @@
+```text
+rule "Turn off gas stove when smoke is detected"
+when
+    Item SmokeSensor changed to ON
+then
+    GasStove.sendCommand(OFF)
+end
+```

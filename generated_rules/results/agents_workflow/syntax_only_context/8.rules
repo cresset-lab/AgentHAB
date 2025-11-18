@@ -1,0 +1,10 @@
+```java
+rule "Turn on Heater when Temperature is Low"
+when
+    Item Temperature changed
+then
+    if (Temperature.state < desiredThreshold) {
+        sendCommand(Heater, ON)
+    }
+end
+```

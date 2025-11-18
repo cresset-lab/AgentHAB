@@ -1,0 +1,11 @@
+```java
+rule "Close Water Valve If Sprinkler Not Activated"
+when
+    Item FireSprinkler changed to OFF
+then
+    // Check if the sprinkler wasn't on in the last 5 hours
+    if ((now.minusHours(5)).isAfter(FireSprinkler.lastChange) && WaterValve.state == ON) {
+        WaterValve.sendCommand(OFF)
+    }
+end
+```

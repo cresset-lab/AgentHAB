@@ -1,0 +1,10 @@
+```text
+rule "Turn on hallway light when motion detected recently"
+when
+    Item HallwayMotionSensor changed to ON
+then
+    if (now.minusSeconds(20).isBefore(HallwayMotionSensor.state == ON ? now : HallwayMotionSensor.lastUpdate)) {
+        sendCommand(HallwayLight, ON)
+    }
+end
+```

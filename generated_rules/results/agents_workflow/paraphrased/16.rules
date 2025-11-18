@@ -1,0 +1,20 @@
+```text
+// Allow lights to be switched on only if the user is at home
+rule "Turn on light only when user is at home"
+when
+    Item UserPresence changed to ON
+then
+    if (UserPresence.state == ON) {
+        sendCommand(LightSwitch, ON)
+    }
+end
+
+rule "Prevent turning on light when user is not at home"
+when
+    Item LightSwitch received command ON
+then
+    if (UserPresence.state != ON) {
+        LightSwitch.sendCommand(OFF)
+    }
+end
+```

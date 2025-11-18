@@ -1,0 +1,13 @@
+```java
+rule "Unlock front door from approved app"
+when
+    Item Unlock_Front_Door received command ON
+then
+    if (triggeringItem == Enhanced_Auto_Lock_Door_App) {
+        // Assuming there's a command to unlock the door
+        Front_Door_Lock.sendCommand(UNLOCK)
+    } else {
+        logInfo("Security", "Unlock request denied for non-approved app.")
+    }
+end
+```

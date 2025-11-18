@@ -1,0 +1,8 @@
+```java
+rule "Turn Off Gas Stove on Smoke Detection"
+when
+    Item Smoke_Detected received update ON
+then
+    sendCommand(Gas_Stove, OFF)
+end
+```

@@ -1,0 +1,13 @@
+```text
+// Rule to switch on the heater if temperature falls below threshold
+rule "Turn on Heater if Temperature is Low"
+when
+    Item Temperature changed
+then
+    val threshold = 21.0 // configured threshold temperature
+    val currentTemp = (Temperature.state as Number).floatValue
+    if (currentTemp < threshold) {
+        sendCommand(Heater, ON)
+    }
+end
+```

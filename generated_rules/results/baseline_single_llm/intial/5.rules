@@ -1,0 +1,10 @@
+```java
+rule "Turn Off Coffee Maker When User is Away or on Vacation"
+when
+    Item User_Status changed
+then
+    if(User_Status.state == "Away" || User_Status.state == "Vacation") {
+        Coffee_Maker.sendCommand(OFF)
+    }
+end
+```

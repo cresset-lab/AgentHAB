@@ -1,0 +1,24 @@
+```text
+rule "Send SMS upon Alert Request"
+when
+    Item flood_alert received command
+    or
+    Item energy_alert received command
+    or
+    Item humidity_alert received command
+    or
+    Item mail_arrived received command
+    or
+    Item medicine_reminder received command
+    or
+    Item presence_change_text received command
+    or
+    Item ready_for_rain received command
+    or
+    Item laundry_monitor received command
+then
+    // Replace with your SMS sending code or function
+    logInfo("SMS Alert", "Sending SMS as requested by " + triggeringItem.name)
+    // Example: sendSMSToUser("+1234567890", "Alert triggered: " + triggeringItem.name)
+end
+```

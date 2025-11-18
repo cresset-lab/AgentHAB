@@ -1,0 +1,13 @@
+```tinytek
+rule "Close Water Valve if Leak Sensor is Wet"
+when
+    Item LeakSensor changed to ON
+then
+    // Wait for 1 minute
+    createTimer(now.plusMinutes(1), [ |
+        if (LeakSensor.state == ON) {
+            WaterValve.sendCommand(OFF)  // Close the water valve
+        }
+    ])
+end
+```

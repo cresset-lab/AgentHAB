@@ -1,0 +1,13 @@
+```text
+// Rule to turn on any light only when not in vacation mode
+rule "Turn on any light when not in vacation mode"
+when
+    Item Light_Switch changed to ON
+then
+    if (Vacation_Mode.state == OFF) {
+        sendCommand(Light_Switch, ON) // Turn on light if vacation mode is off
+    } else {
+        sendCommand(Light_Switch, OFF) // Cancel light if vacation mode is on
+    }
+end
+```

@@ -1,0 +1,8 @@
+```javascript
+rule "Activate Water Valve when Fire Sprinkler is On"
+when
+    Item Fire_Sprinkler changed to ON
+then
+    Water_Valve.sendCommand(ON)
+end
+```

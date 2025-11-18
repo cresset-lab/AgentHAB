@@ -1,0 +1,10 @@
+```text
+rule "Turn on TV when sending a voice message on Thursday"
+when
+    Item VoiceMessageSent changed to ON
+then
+    if (Now.getDayOfWeek() == 4) { // 4 represents Thursday
+        sendCommand(TV, ON)
+    }
+end
+```

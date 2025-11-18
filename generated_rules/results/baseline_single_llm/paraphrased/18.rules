@@ -1,0 +1,12 @@
+```java
+rule "Control AC based on Heater state"
+when
+    Item Heater_State changed to OFF
+then
+    if (Heater_State.state == OFF) {
+        AC.sendCommand(ON)
+    } else {
+        AC.sendCommand(OFF)
+    }
+end
+```

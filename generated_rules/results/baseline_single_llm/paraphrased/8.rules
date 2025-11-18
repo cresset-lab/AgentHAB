@@ -1,0 +1,8 @@
+```dsl
+rule "Turn on Heater when Temperature is Low"
+when
+    Item Temperature bellow ConfiguredThreshold
+then
+    Heater.sendCommand(ON)
+end
+```

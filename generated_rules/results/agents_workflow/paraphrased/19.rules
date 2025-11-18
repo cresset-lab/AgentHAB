@@ -1,0 +1,13 @@
+```text
+rule "Allow opening living room window only when heater and AC are off"
+when
+    Item LivingRoom_Window changed to OPEN
+then
+    if (Heater.state == OFF && AC.state == OFF) {
+        logInfo("rules.example", "Window opened successfully.")
+    } else {
+        sendCommand(LivingRoom_Window, CLOSED)
+        logInfo("rules.example", "Window opening blocked. Heater or AC is currently on.")
+    }
+end
+```

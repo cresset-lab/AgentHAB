@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "request": "When the user is Away, on Vacation, or Sleeping, the door must remain locked.",
+    "openhab_code": "```javascript\nrule \"Secure Door When Away, On Vacation, or Sleeping\"\nwhen\n    Item UserStatus changed\nthen\n    if (UserStatus.state == \"Away\" || UserStatus.state == \"On Vacation\" || UserStatus.state == \"Sleeping\") {\n        Door_Control.sendCommand(                                       // Replace 'Door_Control' with the actual item name for your door lock\n            LOCK )                                                      // Command to lock the door\n    } \nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/1.rules"
+  },
+  {
+    "id": 2,
+    "request": "If the user is Away, on Vacation, or Sleeping, the gas stove must be turned off.",
+    "openhab_code": "```java\nrule \"Turn Off Gas Stove When Away, On Vacation, or Sleeping\"\nwhen\n    Item UserStatus changed\nthen\n    if (UserStatus.state == \"Away\" || UserStatus.state == \"On Vacation\" || UserStatus.state == \"Sleeping\") {\n        GasStove.sendCommand(OFF)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/2.rules"
+  },
+  {
+    "id": 3,
+    "request": "Whenever the fire sprinkler is activated, the water valve must also be turned on.",
+    "openhab_code": "```java\nrule \"Activate Water Valve on Sprinkler\"\nwhen\n    Item FireSprinkler changed to ON\nthen\n    WaterValve.sendCommand(ON)\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/3.rules"
+  },
+  {
+    "id": 4,
+    "request": "If the user is Away or on Vacation, the induction cooktop must be switched off.",
+    "openhab_code": "```java\nrule \"Switch off Induction Cooktop when Away or on Vacation\"\nwhen\n    Item UserStatus changed\nthen\n    if (UserStatus.state == \"Away\" || UserStatus.state == \"Vacation\") {\n        InductionCooktop.sendCommand(OFF)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/4.rules"
+  },
+  {
+    "id": 5,
+    "request": "If the user is Away or on Vacation, the coffee maker should be off.",
+    "openhab_code": "```java\nrule \"Control Coffee Maker Based on User Occupancy\"\nwhen\n    Member of gUserStatus changed   \nthen\n    if (gUserStatus.statesContain(Situation_Away) || gUserStatus.statesContain(Situation_Vacation)) {\n        Coffee_Maker.sendCommand(OFF)\n    } else {\n        Coffee_Maker.sendCommand(ON)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/5.rules"
+  },
+  {
+    "id": 6,
+    "request": "The air conditioner must be off whenever the heater is on.",
+    "openhab_code": "```java\nrule \"Turn off Air Conditioner when the Heater is ON\"\nwhen\n    Item Heater received update ON\nthen\n    AirConditioner.sendCommand(OFF)\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/6.rules"
+  },
+  {
+    "id": 7,
+    "request": "Turn the gas stove off whenever smoke is detected.",
+    "openhab_code": "```java\nrule \"Turn Off Gas Stove on Smoke Detection\"\nwhen\n    Item Smoke_Detected received update ON\nthen\n    sendCommand(Gas_Stove, OFF)\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/7.rules"
+  },
+  {
+    "id": 8,
+    "request": "Switch on the heater if the measured temperature falls below the configured threshold.",
+    "openhab_code": "```dsl\nrule \"Turn on Heater when Temperature is Low\"\nwhen\n    Item Temperature bellow ConfiguredThreshold\nthen\n    Heater.sendCommand(ON)\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/8.rules"
+  },
+  {
+    "id": 9,
+    "request": "Bedroom and hallway lights must turn on when the motion sensor detects movement.",
+    "openhab_code": "```java\nrule \"Turn on lights when motion detected\"\nwhen\n    Item MotionSensor detects motion\nthen\n    BedroomLight.sendCommand(ON)\n    HallwayLight.sendCommand(ON)\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/9.rules"
+  },
+  {
+    "id": 10,
+    "request": "If a voice message is sent on a Thursday, the TV should be turned on.",
+    "openhab_code": "```java\nrule \"Turn on TV on Voice Message Sent Thursday\"\nwhen\n    Channel voiceMessage # Event received (adjust with proper communication channel details)\nthen\n    val currentDateTime = ZonedDateTime.now()\n    \n    if(currentDateTime.getDayOfWeek() == DayOfWeek.THURSDAY) {\n        sendCommand(TV, ON)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/10.rules"
+  },
+  {
+    "id": 11,
+    "request": "SMS sending is allowed only when requested by one of the flood-alert, energy-alerts, humidity-alert, mail-arrived, medicine-reminder, presence-change-text, ready-for-rain, or laundry-monitor apps.",
+    "openhab_code": "```java\nrule \"Send SMS Alert on Custom Request\"\nwhen\n    OR\n        Item flood-alert received update\n        Item energy-alerts received update\n        Item humidity-alert received update\n        Item mail-arrived received update\n        Item medicine-reminder received update\n        Item presence-change-text received update\n        Item ready-for-rain received update\n        Item laundry-monitor received update\nthen\n    if (getSenderToken() !== null) {\n        val String message = \"Alert received: \" + triggeringItem.name\n        sendSMS(getSenderToken(), message)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/11.rules"
+  },
+  {
+    "id": 12,
+    "request": "Unlocking the front door is permitted only if the request comes from the enhanced-auto-lock-door app.",
+    "openhab_code": "```java\nrule \"Unlock front door from approved app\"\nwhen\n    Item Unlock_Front_Door received command ON\nthen\n    if (triggeringItem == Enhanced_Auto_Lock_Door_App) {\n        // Assuming there's a command to unlock the door\n        Front_Door_Lock.sendCommand(UNLOCK)\n    } else {\n        logInfo(\"Security\", \"Unlock request denied for non-approved app.\")\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/12.rules"
+  },
+  {
+    "id": 13,
+    "request": "Closing the water valve is allowed only if the fire sprinkler has not been on at any time in the last five hours.",
+    "openhab_code": "```less\nrule \"Close Water Valve Only if Sprinkler is Off\"\nwhen\n    Time cron \"0 0/5 * * * ?\" // Check every 5 minutes\nthen\n    if (FireSprinkler.states == OFF && (now.minusHours(5).isAfter(FireSprinkler.lastChange))) {\n        sendCommand(WaterValve, OFF)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/13.rules"
+  },
+  {
+    "id": 14,
+    "request": "The water valve may be closed only when the water leak sensor has detected wetness within the past minute.",
+    "openhab_code": "```javascript\nrule \"Close Water Valve on Leak Detection\"\nwhen\n    Item WaterLeakSensor changed to ON // Sensor triggered\nthen\n    // create a timer for 1 minute\n    var Timer closeValveTimer = t.createTimer(now.plusMinutes(1), [ |\n        // close the water valve if sensor state is ON within the past minute\n        if (WaterLeakSensor.state == ON) {\n            WaterValve.sendCommand(OFF) // Close the water valve\n        }\n    ])\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/14.rules"
+  },
+  {
+    "id": 15,
+    "request": "Any light may be turned on only when the system is not in vacation mode.",
+    "openhab_code": "```java\nrule \"Enable light only when not in vacation mode\"\nwhen\n    Member of gLights received command ON\nthen\n    if (VacationMode.state == OFF) {\n        // Allow the light to turn on\n        // Include additional logic if necessary\n    } else {\n        // Cancel the light ON command if in vacation mode\n        member.sendCommand(OFF)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/15.rules"
+  },
+  {
+    "id": 16,
+    "request": "Lights are allowed to be switched on only if the user is currently at home.",
+    "openhab_code": "```java\nrule \"Toggle Lights Based on User Presence\"\nwhen\n    Member of gLights received command ON\nthen\n    if (CurrentUserPresence.state == OPEN) { // Assuming CurrentUserPresence is an item linked to a presence sensor\n        sendCommand(notification, \"The lights have been turned ON.\")\n        // Assuming members of gLights is being handled here.\n        applyTransform(\"JSONPath\", \"$.command\")  // (Optional) intended as HTTPS error control indication, adapt as needed\n        \n    } else {\n        sendCommand(receivedEvent.source, OFF)\n        sendCommand(notification, \"Cannot turn ON lights, user not at home.\")\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/16.rules"
+  },
+  {
+    "id": 17,
+    "request": "The hallway light may be turned on only if the hallway motion sensor was active within the last 20 seconds.",
+    "openhab_code": "```javascript\nrule \"Hallway Light Activation\"\nwhen\n    Item Hallway_Motion_Sensor changed to ON\nthen\n    createTimer(now.plusSeconds(20)) [ |\n        if (Hallway_Motion_Sensor.lastUpdate >= now.minusSeconds(20)) {\n            Hallway_Light.sendCommand(ON)\n        } else {\n            Hallway_Light.sendCommand(OFF)\n        }\n    ]\nend\n\nrule \"Turn Off Hallway Light\"\nwhen\n    Item Hallway_Motion_Sensor changed to OFF\nthen\n    Hallway_Light.sendCommand(OFF)\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/17.rules"
+  },
+  {
+    "id": 18,
+    "request": "The AC can be switched on only when the heater is turned off.",
+    "openhab_code": "```java\nrule \"Control AC based on Heater state\"\nwhen\n    Item Heater_State changed to OFF\nthen\n    if (Heater_State.state == OFF) {\n        AC.sendCommand(ON)\n    } else {\n        AC.sendCommand(OFF)\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/18.rules"
+  },
+  {
+    "id": 19,
+    "request": "Opening the living room window is allowed only if both the heater and the AC are off.",
+    "openhab_code": "```java\nrule \"Enforce Window Opening Restrictions\"\nwhen\n    Item Heater received update ON or\n    Item AC received update ON\nthen\n    if (Heater.state == OFF && AC.state == OFF) {\n        // Allow window opening logic here\n        sendNotification(\"Living Room window can be opened.\")\n    } else {\n        // Logic to deny window opening here\n        sendNotification(\"Can't open Living Room window; Heater or AC is on.\")\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/19.rules"
+  },
+  {
+    "id": 20,
+    "request": "The thermostat may be turned off only if it was last on within the previous 120 seconds.",
+    "openhab_code": "```java\nrule \"Allow thermostat to turn off only within 120 seconds\"\nwhen\n    Item Thermostat_Status changed to OFF\nthen\n    // Checks the last status change time of the Thermostat\n    val lastUpdate = Thermostat_Status.lastChange\n    if (lastUpdate !== null && now.minusSeconds(120).isBefore(lastUpdate.millis)) {\n        logInfo(\"Thermostat\", \"Thermostat turned off within allowable time frame.\")\n    } else {\n        // Cancel the OFF command since the thermostat was not on in the last 120 seconds\n        logWarn(\"Thermostat\", \"Thermostat cannot be turned off, it was not on for the last 120 seconds.\")\n        Thermostat_Status.sendCommand(ON) // Assumes you have to turn back ON\n    }\nend\n```",
+    "model": "gpt-4o-mini",
+    "temperature": 1.5,
+    "rule_path": "datasets/results/paraphrased/20.rules"
+  }
+]

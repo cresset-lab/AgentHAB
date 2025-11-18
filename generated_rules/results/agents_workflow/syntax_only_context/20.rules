@@ -1,0 +1,16 @@
+```ruby
+rule "Thermostat Off Control"
+when
+    Item Thermostat_Switch received command OFF
+then
+    val lastChange = Thermostat_Switch.lastUpdate
+    if (lastChange != null && now.minusSeconds(120).isBefore(lastChange)) {
+        // Proceed to turn off thermostat
+        sendCommand(Thermostat_Switch, OFF)
+        logInfo("Thermostat", "Thermostat switched off")
+    } else {
+        // Do not turn off thermostat
+        logInfo("Thermostat", "Failed to switch off. Was not on within the last 120 seconds.")
+    }
+end
+```

@@ -1,0 +1,13 @@
+```text
+// Rule to close the water valve if water leak sensor detected wetness within the past minute
+rule "Close water valve when leak detected"
+when
+    Item WaterLeakSensor changed to ON
+then
+    createTimer(now.plusMinutes(1), [ |
+        if (WaterLeakSensor.state == ON) {
+            sendCommand(WaterValve, OFF)
+        }
+    ])
+end
+```

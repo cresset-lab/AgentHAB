@@ -1,0 +1,8 @@
+```ruby
+rule "Control Water Valve Based on Fire Sprinkler"
+when
+    Item Fire_Sprinkler received command ON
+then
+    sendCommand(Water_Valve, ON)
+end
+```

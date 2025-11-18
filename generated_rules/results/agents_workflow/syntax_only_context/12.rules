@@ -1,0 +1,12 @@
+```yaml
+rule "Unlock Front Door Only by Enhanced Auto Lock Door App"
+when
+    Item unlockFrontDoor received command ON
+then
+    if (frontDoorLock.state == ON && unlockFrontDoor.lastAction == APP) {
+        sendCommand(frontDoorLock, OFF)  // Command to unlock the front door
+    } else {
+        logInfo("DoorSecurity", "Unauthorized access attempt to unlock the front door.")
+    }
+end
+```
