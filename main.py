@@ -73,8 +73,15 @@ def run_generation_loop(
     *,
     max_attempts: int,
     system_context: SystemContext | None = None,
-) -> Tuple[GenerationResult, ValidationResult, bool]:
-    """Iteratively generate and validate openHAB code with a retry guard."""
+) -> Tuple[GenerationResult, ValidationResult, bool, int]:
+    """Iteratively generate and validate openHAB code with a retry guard.
+
+    Returns:
+        generation: Final generation result (from the last attempt).
+        validation: Validation result associated with the returned generation.
+        is_valid: True if a syntactically (and contextually) valid rule was found.
+        attempts_used: How many generation/validation attempts were performed.
+    """
     docs = retriever.invoke(request)
     prompt_builder = PromptBuilder(request=request, documents=list(docs))
     
@@ -132,7 +139,7 @@ def run_generation_loop(
                     print("Warnings:", context_validation.warnings)
         
         # All validations passed!
-        return generation, validation, True
+        return generation, validation, True, attempt
 
     if last_generation is None or last_validation is None:
         raise RuntimeError("Generation loop terminated without producing any attempts.")
@@ -141,7 +148,9 @@ def run_generation_loop(
         f"Exceeded {max_attempts} attempts without validator approval. "
         "Saving latest result for manual review."
     )
-    return last_generation, last_validation, False
+    # If we never achieved a valid rule, we conservatively report that all
+    # configured attempts were used.
+    return last_generation, last_validation, False, max_attempts
 
 
 def maybe_deploy_via_mcp(rule_code: str, *, request: str, destination_name: str) -> None:
@@ -203,7 +212,7 @@ def main() -> None:
             print(f"⚠ Warning: Could not fetch system context: {e}")
             print("Proceeding without context-aware validation.\n")
 
-    generation, validation, is_valid = run_generation_loop(
+    generation, validation, is_valid, attempts_used = run_generation_loop(
         request,
         retriever,
         max_attempts=args.max_attempts,
@@ -217,6 +226,7 @@ def main() -> None:
     print(f"\n=== Summary ===")
     print(f"Generated {len(saved_paths)} rule file(s)")
     print(f"Validator summary: {validation.summary}")
+    print(f"Generation attempts used: {attempts_used}")
     if not is_valid:
         print(validation.as_feedback_entry())
 
