@@ -1,0 +1,85 @@
+[
+  {
+    "id": 1,
+    "text": "When the user is Away, on Vacation, or Sleeping, the door must remain locked."
+  },
+  {
+    "id": 2,
+    "text": "If the user is Away, on Vacation, or Sleeping, the gas stove must be turned off."
+  },
+  {
+    "id": 3,
+    "text": "Whenever the fire sprinkler is activated, the water valve must also be turned on."
+  },
+  {
+    "id": 4,
+    "text": "If the user is Away or on Vacation, the induction cooktop must be switched off."
+  },
+  {
+    "id": 5,
+    "text": "If the user is Away or on Vacation, the coffee maker should be off."
+  },
+  {
+    "id": 6,
+    "text": "The air conditioner must be off whenever the heater is on."
+  },
+  {
+    "id": 7,
+    "text": "Turn the gas stove off whenever smoke is detected."
+  },
+  {
+    "id": 8,
+    "text": "Switch on the heater if the measured temperature falls below the configured threshold."
+  },
+  {
+    "id": 9,
+    "text": "Bedroom and hallway lights must turn on when the motion sensor detects movement."
+  },
+  {
+    "id": 10,
+    "text": "If a voice message is sent on a Thursday, the TV should be turned on."
+  },
+  {
+    "id": 11,
+    "text": "SMS sending is allowed only when requested by one of the flood-alert, energy-alerts, humidity-alert, mail-arrived, medicine-reminder, presence-change-text, ready-for-rain, or laundry-monitor apps."
+  },
+  {
+    "id": 12,
+    "text": "Unlocking the front door is permitted only if the request comes from the enhanced-auto-lock-door app."
+  },
+  {
+    "id": 13,
+    "text": "Closing the water valve is allowed only if the fire sprinkler has not been on at any time in the last five hours."
+  },
+  {
+    "id": 14,
+    "text": "The water valve may be closed only when the water leak sensor has detected wetness within the past minute."
+  },
+  {
+    "id": 15,
+    "text": "Any light may be turned on only when the system is not in vacation mode."
+  },
+  {
+    "id": 16,
+    "text": "Lights are allowed to be switched on only if the user is currently at home."
+  },
+  {
+    "id": 17,
+    "text": "The hallway light may be turned on only if the hallway motion sensor was active within the last 20 seconds."
+  },
+  {
+    "id": 18,
+    "text": "The AC can be switched on only when the heater is turned off."
+  },
+  {
+    "id": 19,
+    "text": "Opening the living room window is allowed only if both the heater and the AC are off."
+  },
+  {
+    "id": 20,
+    "text": "The thermostat may be turned off only if it was last on within the previous 120 seconds."
+  }
+]
+
+
+

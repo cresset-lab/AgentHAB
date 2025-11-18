@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "text": "If User Away, on Vacation or Sleeping Then Door is Locked."
+  },
+  {
+    "id": 2,
+    "text": "If User Away, on Vacation or Sleeping Then Gas Stove is off."
+  },
+  {
+    "id": 3,
+    "text": "If Fire Sprinkler is on Then Water Valve is on."
+  },
+  {
+    "id": 4,
+    "text": "If User Away or on Vacation Then Induction Cooktop is off."
+  },
+  {
+    "id": 5,
+    "text": "If User Away or on Vacation Then Coffee Maker is off."
+  },
+  {
+    "id": 6,
+    "text": "If Heater is on Then Air Conditioner is off."
+  },
+  {
+    "id": 7,
+    "text": "Turn off the gas stove, if the smoke is detected."
+  },
+  {
+    "id": 8,
+    "text": "Turn on the heater, if the temperature is below the threshold."
+  },
+  {
+    "id": 9,
+    "text": "The lights (in a bedroom, hallway, etc.) must be turned on if the motion sensor is active."
+  },
+  {
+    "id": 10,
+    "text": "When sending a voice message if it is on Thursday then turn on the TV."
+  },
+  {
+    "id": 11,
+    "text": "Allow sending SMS only if it is requested by flood-alert or energy-alerts or humidity-alert or mail-arrived or medicine-reminder or presence-change-text or ready-for-rain or laundry-monitor apps."
+  },
+  {
+    "id": 12,
+    "text": "Allow unlocking the front door only if it is requested by enhanced-auto-lock-door app."
+  },
+  {
+    "id": 13,
+    "text": "Allow water valve to be closed only if the fire-sprinkler was not on in the last 5 hours."
+  },
+  {
+    "id": 14,
+    "text": "Allow water valve to be closed only if water leak sensor sensed wet within 1 minute."
+  },
+  {
+    "id": 15,
+    "text": "Allow any light to be turned on only if the system is not on vacation mode."
+  },
+  {
+    "id": 16,
+    "text": "Allow light to be switched on only if user is at home."
+  },
+  {
+    "id": 17,
+    "text": "Allow hallway light to get turned on only if the hallway motion sensor has tripped within 20 sec."
+  },
+  {
+    "id": 18,
+    "text": "Allow AC to be switched on only if the heater is off."
+  },
+  {
+    "id": 19,
+    "text": "Allow living room window to be opened only if both heater and AC are off."
+  },
+  {
+    "id": 20,
+    "text": "Allow turning off thermostat only if lastly it was on within 120 sec."
+  }
+]
+
