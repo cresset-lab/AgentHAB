@@ -4,10 +4,10 @@ openHABAgents is an AI-driven toolkit that turns natural language automation req
 
 ## Overview
 
-The repository bundles two primary components:
+The repository consists of:
 
-1. **Python Agents** (`main.py`) - Orchestrate retrieval-augmented rule generation, iterative validation against live openHAB state, and file management for `.rules` artifacts. The agents talk to openHAB **indirectly via the bundled MCP server** to fetch items, things, and existing rules, and can optionally deploy validated rules back through the same server.
-2. **MCP Server** (`openhab-mcp/`) - Model Context Protocol server for both the Python agents **and** Claude Desktop / Cursor / Cline integration. It wraps the openHAB REST API and exposes tools for listing items/things/rules and for rule deployment.
+**Python Agents** (`main.py`) - Orchestrate retrieval-augmented rule generation, iterative validation against live openHAB state, and file management for `.rules` artifacts. The agents talk to openHAB **indirectly via the bundled MCP server** to fetch items, things, and existing rules, and can optionally deploy validated rules back through the same server.
+
 
 ## Key Features
 
@@ -19,7 +19,7 @@ The repository bundles two primary components:
 - **Individual rule file management**: Each generated rule is automatically saved to a separate `.rules` file for better organization and modularity.
 - Retrieval over curated documentation in `context/` using the LangChain BM25 retriever.
 - Configurable output location via `OPENHAB_RULES_DIR` with sensible defaults (`generated_rules/`).
-- Optional automatic deployment to an MCP server by setting `OPENHAB_MCP_URL` (plus token support).
+- Optional automatic deployment to an MCP server by setting `OPENHAB_MCP_URL` (plus token support). (in development)
 - Extensible prompt building that records prior candidates and validator feedback for subsequent iterations.
 
 ## Quick Start
@@ -52,22 +52,7 @@ The repository bundles two primary components:
    OPENHAB_URL=http://localhost:8080
    OPENHAB_API_TOKEN=your_token_here
    ```
-   
-   **Option B: Run openHAB in Docker**
-   ```bash
-   cd openhab-mcp
-   docker compose -f docker-compose.macos.yml up -d
-   # Access openHAB UI at http://localhost:18080
-   # Generate API token in: Settings → API Security
-   
-   # Then configure .env
-   cd ..
-   cp env.example .env
-   # Edit .env with:
-   OPENAI_API_KEY=your_openai_api_key_here
-   OPENHAB_URL=http://localhost:18080
-   OPENHAB_API_TOKEN=your_generated_token
-   ```
+  
 
 ### CLI Usage
 
@@ -286,7 +271,7 @@ Generated rules are saved to `generated_rules/` (or your configured `OPENHAB_RUL
 2. openHAB will detect the new rules automatically
 3. Monitor openHAB logs to confirm activation
 
-**Option 2: Docker Volume Mount**
+**Option 2: Docker Volume Mount (in development)**
 If running openHAB in Docker, mount your `generated_rules/` directory:
 ```yaml
 volumes:
@@ -328,12 +313,5 @@ MIT
 - Review the curated documentation in `context/`
 - Consult the official [openHAB documentation](https://www.openhab.org/docs/)
 
-## Future Enhancements
 
-- [ ] Support additional openHAB scripting languages (JavaScript, Jython).
-- [ ] Direct REST deployment into openHAB without MCP intermediaries.
-- [ ] Interactive refinement loops with user feedback.
-- [ ] Rule simulation and testing utilities.
-- [ ] Enhanced item/thing discovery from openHAB APIs.
-- [ ] Multi-rule orchestration for complex automation scenarios.
 
