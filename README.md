@@ -1,6 +1,8 @@
-# openHABAgents
+# AgentHAB
 
-openHABAgents is an AI-driven toolkit that turns natural language automation requests into executable openHAB DSL rules. It couples an iterative generation and validation loop with live openHAB context (via the bundled MCP server) so you can move from intent to live automation quickly and safely.
+**Automating OpenHAB Rule Generation with Multi-Agent Policy and Validation**
+
+AgentHAB is an AI-driven toolkit that turns natural language automation requests into executable openHAB DSL rules. It couples an iterative generation and validation loop with live openHAB context (via the bundled MCP server) so you can move from intent to live automation quickly and safely.
 
 ## Overview
 
@@ -36,7 +38,7 @@ The repository consists of:
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd openHABAgents
+   cd AgentHAB
    ```
 2. Install Python dependencies:
    ```bash
@@ -84,7 +86,7 @@ To set up MCP integration for Claude/Cursor:
 ## Project Structure
 
 ```
-openHABAgents/
+AgentHAB/
 ├── ARCHITECTURE.md               # High-level system design notes
 ├── agents/
 │   ├── policy_generator.py       # LangChain-based rule generator
